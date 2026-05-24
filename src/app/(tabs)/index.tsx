@@ -6,6 +6,9 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import type { Rect } from '@/components/lightbox/geometry';
+import { ImageLightbox } from '@/components/lightbox/image-lightbox';
+import { measureFrame } from '@/components/lightbox/measure';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -32,6 +35,14 @@ export default function StretchesScreen() {
 
   const [query, setQuery] = useState('');
   const [selectedMuscles, setSelectedMuscles] = useState<string[]>([]);
+  const [lightbox, setLightbox] = useState<{ photos: (typeof stretchImages)[string]; frame: Rect } | null>(
+    null
+  );
+
+  const openImage = (stretch: Stretch, frame: Rect) => {
+    const photos = stretchImages[stretch.image];
+    if (photos?.length) setLightbox({ photos, frame });
+  };
   // Snapshot the usage-ordered pills on focus, so tapping one doesn't reshuffle them live.
   const [orderedMuscles, setOrderedMuscles] = useState<string[]>(() => allMuscles(stretches));
 
@@ -114,6 +125,7 @@ export default function StretchesScreen() {
               stretch={item}
               onPress={() => router.push({ pathname: '/stretch/[id]', params: { id: item.id } })}
               onAdd={() => quickAdd(item)}
+              onOpenImage={(frame) => openImage(item, frame)}
             />
           )}
           ListEmptyComponent={
@@ -123,6 +135,15 @@ export default function StretchesScreen() {
           }
         />
       </SafeAreaView>
+
+      {lightbox && (
+        <ImageLightbox
+          photos={lightbox.photos}
+          initialIndex={0}
+          sourceFrames={[lightbox.frame]}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </ThemedView>
   );
 }
@@ -131,21 +152,35 @@ function StretchRow({
   stretch,
   onPress,
   onAdd,
+  onOpenImage,
 }: {
   stretch: Stretch;
   onPress: () => void;
   onAdd: () => void;
+  onOpenImage: (frame: Rect) => void;
 }) {
   const theme = useTheme();
   const photo = stretchImages[stretch.image]?.[0];
+  const thumbRef = useRef<View | null>(null);
+
+  const openImage = async () => {
+    const frame = await measureFrame(thumbRef.current);
+    if (frame) onOpenImage(frame);
+  };
+
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
-      <Pressable onPress={onPress} style={({ pressed }) => [styles.rowMain, pressed && styles.pressed]}>
+      <Pressable
+        ref={thumbRef}
+        onPress={photo ? openImage : undefined}
+        style={({ pressed }) => pressed && styles.pressed}>
         {photo ? (
           <Image source={photo} style={styles.thumb} contentFit="cover" />
         ) : (
           <View style={[styles.thumb, { backgroundColor: theme.backgroundSelected }]} />
         )}
+      </Pressable>
+      <Pressable onPress={onPress} style={({ pressed }) => [styles.rowMain, pressed && styles.pressed]}>
         <View style={styles.rowText}>
           <ThemedText type="default" numberOfLines={1}>
             {stretch.name}

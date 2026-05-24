@@ -2,8 +2,12 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import type { Rect } from '@/components/lightbox/geometry';
+import { ImageLightbox } from '@/components/lightbox/image-lightbox';
+import { measureFrame } from '@/components/lightbox/measure';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -24,6 +28,17 @@ export default function StretchDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
   const stretch = stretches.find((s) => s.id === id);
+
+  const photoRefs = useRef<(View | null)[]>([]);
+  const [lightbox, setLightbox] = useState<{ index: number; frames: Rect[] } | null>(null);
+
+  const openLightbox = async (index: number, count: number) => {
+    const frames = await Promise.all(
+      photoRefs.current.slice(0, count).map((node) => measureFrame(node))
+    );
+    if (frames.some((f) => f == null)) return;
+    setLightbox({ index, frames: frames as Rect[] });
+  };
 
   if (!stretch) {
     return (
@@ -57,7 +72,15 @@ export default function StretchDetailScreen() {
         {photos.length > 0 && (
           <View style={styles.photos}>
             {photos.map((photo, i) => (
-              <Image key={i} source={photo} style={styles.photo} contentFit="cover" />
+              <Pressable
+                key={i}
+                ref={(node) => {
+                  photoRefs.current[i] = node;
+                }}
+                onPress={() => openLightbox(i, photos.length)}
+                style={({ pressed }) => [styles.photoWrap, pressed && styles.pressed]}>
+                <Image source={photo} style={styles.photo} contentFit="cover" />
+              </Pressable>
             ))}
           </View>
         )}
@@ -122,6 +145,15 @@ export default function StretchDetailScreen() {
           </>
         )}
       </ScrollView>
+
+      {lightbox && (
+        <ImageLightbox
+          photos={photos}
+          initialIndex={lightbox.index}
+          sourceFrames={lightbox.frames}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </ThemedView>
   );
 }
@@ -131,7 +163,8 @@ const styles = StyleSheet.create({
   missing: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { padding: Spacing.three, gap: Spacing.three, paddingBottom: Spacing.six },
   photos: { flexDirection: 'row', gap: Spacing.two },
-  photo: { flex: 1, aspectRatio: 850 / 567, borderRadius: Spacing.three },
+  photoWrap: { flex: 1 },
+  photo: { width: '100%', aspectRatio: 850 / 567, borderRadius: Spacing.three },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   tag: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.one, borderRadius: Spacing.five },
   label: { letterSpacing: 1, marginTop: Spacing.one },

@@ -1,14 +1,16 @@
 {
   "expo": {
-    "name": "stretching-pwa",
-    "slug": "stretching-pwa",
+    "name": "Stretches",
+    "slug": "stretching",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "stretchingpwa",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.conradhunter.stretching",
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {

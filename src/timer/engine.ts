@@ -1,4 +1,4 @@
-export type Segment = { label: string; seconds: number };
+export type Segment = { label: string; seconds: number; image?: string };
 export type TimerStatus = "running" | "paused" | "completed";
 
 export type TimerState = {

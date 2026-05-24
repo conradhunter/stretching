@@ -13,6 +13,8 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { stretchImages } from '@/stretches/images';
+import { buildRoutineSegments, type ResolvedItem } from '@/routines/routines';
+import { getRoutine } from '@/routines/store';
 import { stretches } from '@/stretches/library';
 import { buildSegments, withLeadIn } from '@/stretches/segments';
 import { useTimer } from '@/timer/useTimer';
@@ -27,15 +29,41 @@ export default function RunScreen() {
   useKeepAwake();
   const theme = useTheme();
   const router = useRouter();
-  const { id, option } = useLocalSearchParams<{ id: string; option: string }>();
+  const { id, option, routine: routineId } = useLocalSearchParams<{
+    id?: string;
+    option?: string;
+    routine?: string;
+  }>();
 
-  const stretch = stretches.find((s) => s.id === id);
-  const chosen = stretch?.options[Number(option)];
+  // Resolve either a single stretch+option or a whole routine into one plan.
+  const plan = useMemo(() => {
+    if (routineId) {
+      const routine = getRoutine(routineId);
+      if (!routine) return null;
+      const items = routine.items
+        .map((it): ResolvedItem | null => {
+          const s = stretches.find((x) => x.id === it.stretchId);
+          const opt = s?.options[it.optionIndex];
+          return s && opt ? { stretch: s, option: opt } : null;
+        })
+        .filter((x): x is ResolvedItem => x !== null);
+      if (items.length === 0) return null;
+      return { title: routine.name, segments: buildRoutineSegments(items), fallbackImage: undefined };
+    }
 
-  const segments = useMemo(() => {
-    if (!stretch || !chosen) return [];
-    return withLeadIn(buildSegments(stretch, chosen), { label: 'Get ready', seconds: 3 });
-  }, [stretch, chosen]);
+    const stretch = stretches.find((s) => s.id === id);
+    const chosen = stretch?.options[Number(option)];
+    if (!stretch || !chosen) return null;
+    const segments = withLeadIn(buildSegments(stretch, chosen), {
+      label: 'Get ready',
+      seconds: 3,
+      image: stretch.image,
+    });
+    return { title: stretch.name, segments, fallbackImage: stretch.image };
+  }, [id, option, routineId]);
+
+  // useTimer must run unconditionally; feed a harmless placeholder when invalid.
+  const segments = plan?.segments ?? [{ label: '—', seconds: 1 }];
 
   const timer = useTimer(segments, {
     onEvent: (event) => {
@@ -50,10 +78,10 @@ export default function RunScreen() {
 
   // Announce the current segment whenever it changes (covers the first one too).
   useEffect(() => {
-    if (segments.length === 0) return;
+    if (!plan) return;
     Speech.stop();
     Speech.speak(timer.currentSegment.label);
-  }, [timer.currentSegment.label, segments.length]);
+  }, [plan, timer.currentSegment.label]);
 
   // Stop any speech when leaving the screen.
   useEffect(() => {
@@ -62,10 +90,10 @@ export default function RunScreen() {
     };
   }, []);
 
-  if (!stretch || !chosen) {
+  if (!plan) {
     return (
       <ThemedView style={styles.center}>
-        <ThemedText>Couldn’t start this stretch.</ThemedText>
+        <ThemedText>Couldn’t start this.</ThemedText>
         <Pressable onPress={() => router.back()}>
           <ThemedText type="linkPrimary">Go back</ThemedText>
         </Pressable>
@@ -73,8 +101,10 @@ export default function RunScreen() {
     );
   }
 
-  const photo = stretchImages[stretch.image]?.[0];
-  const isLeadIn = timer.segmentIndex === 0;
+  const label = timer.currentSegment.label;
+  const imageKey = timer.currentSegment.image ?? plan.fallbackImage;
+  const photo = imageKey ? stretchImages[imageKey]?.[0] : undefined;
+  const isPrep = label === 'Get ready' || label.startsWith('Next:');
   const done = timer.status === 'completed';
 
   return (
@@ -87,12 +117,12 @@ export default function RunScreen() {
         {photo && <Image source={photo} style={styles.photo} contentFit="cover" />}
 
         <ThemedText type="small" themeColor="textSecondary">
-          {stretch.name} · {timer.segmentIndex + 1}/{segments.length}
+          {plan.title} · {timer.segmentIndex + 1}/{segments.length}
         </ThemedText>
         <ThemedText type="subtitle" style={styles.segLabel}>
-          {done ? 'Done' : timer.currentSegment.label}
+          {done ? 'Done' : label}
         </ThemedText>
-        <ThemedText style={[styles.clock, isLeadIn && !done && { color: theme.textSecondary }]}>
+        <ThemedText style={[styles.clock, isPrep && !done && { color: theme.textSecondary }]}>
           {clock(timer.remaining)}
         </ThemedText>
 

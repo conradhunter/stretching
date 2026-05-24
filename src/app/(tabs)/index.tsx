@@ -17,7 +17,15 @@ import { addToQuick, useQuickRoutine } from '@/routines/quickRoutine';
 import { stretchImages } from '@/stretches/images';
 import { stretches } from '@/stretches/library';
 import { bumpMuscle, useMuscleCounts } from '@/stretches/muscleUsage';
-import { allMuscles, filterStretches, muscleLabel, orderByUsage } from '@/stretches/muscles';
+import {
+  allMuscles,
+  expandMuscleSelection,
+  filterStretches,
+  isMuscleGroup,
+  MUSCLE_GROUPS,
+  muscleLabel,
+  orderByUsage,
+} from '@/stretches/muscles';
 import type { Stretch } from '@/stretches/segments';
 
 export default function StretchesScreen() {
@@ -53,16 +61,31 @@ export default function StretchesScreen() {
   );
 
   const filtered = useMemo(
-    () => filterStretches(stretches, query, selectedMuscles),
+    () => filterStretches(stretches, query, expandMuscleSelection(selectedMuscles)),
     [query, selectedMuscles]
   );
 
-  const toggleMuscle = (muscle: string) =>
+  const toggleMuscle = (token: string) =>
     setSelectedMuscles((prev) => {
-      if (prev.includes(muscle)) return prev.filter((m) => m !== muscle);
-      bumpMuscle(muscle); // count only when selecting
-      return [...prev, muscle];
+      if (prev.includes(token)) return prev.filter((m) => m !== token);
+      if (!isMuscleGroup(token)) bumpMuscle(token); // count only individual muscles, on select
+      return [...prev, token];
     });
+
+  const renderPill = (token: string) => {
+    const active = selectedMuscles.includes(token);
+    return (
+      <Pressable key={token} onPress={() => toggleMuscle(token)}>
+        <ThemedView
+          type={active ? 'backgroundSelected' : 'backgroundElement'}
+          style={[styles.pill, { borderColor: active ? theme.text : 'transparent' }]}>
+          <Text style={[styles.pillText, { color: active ? theme.text : theme.textSecondary }]}>
+            {muscleLabel(token)}
+          </Text>
+        </ThemedView>
+      </Pressable>
+    );
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -98,22 +121,17 @@ export default function StretchesScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          style={styles.groupsScroll}
+          contentContainerStyle={styles.pills}>
+          {MUSCLE_GROUPS.map((g) => renderPill(g.name))}
+        </ScrollView>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           style={styles.pillsScroll}
           contentContainerStyle={styles.pills}>
-          {orderedMuscles.map((muscle) => {
-            const active = selectedMuscles.includes(muscle);
-            return (
-              <Pressable key={muscle} onPress={() => toggleMuscle(muscle)}>
-                <ThemedView
-                  type={active ? 'backgroundSelected' : 'backgroundElement'}
-                  style={[styles.pill, { borderColor: active ? theme.text : 'transparent' }]}>
-                  <Text style={[styles.pillText, { color: active ? theme.text : theme.textSecondary }]}>
-                    {muscleLabel(muscle)}
-                  </Text>
-                </ThemedView>
-              </Pressable>
-            );
-          })}
+          {orderedMuscles.map(renderPill)}
         </ScrollView>
         <FlatList
           data={filtered}
@@ -228,7 +246,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     fontSize: 16,
   },
-  pillsScroll: { flexGrow: 0, height: 48, marginTop: Spacing.two, marginBottom: Spacing.two },
+  groupsScroll: { flexGrow: 0, height: 48, marginTop: Spacing.two },
+  pillsScroll: { flexGrow: 0, height: 48, marginTop: Spacing.one, marginBottom: Spacing.two },
   pills: {
     gap: Spacing.two,
     paddingRight: Spacing.three,

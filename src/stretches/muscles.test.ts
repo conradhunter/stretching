@@ -1,5 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { allMuscles, filterStretches, muscleLabel, orderByUsage } from "./muscles";
+import {
+  allMuscles,
+  expandMuscleSelection,
+  filterStretches,
+  isMuscleGroup,
+  muscleLabel,
+  orderByUsage,
+} from "./muscles";
 import type { Stretch } from "./segments";
 
 const make = (id: string, muscles: string[], name = id): Stretch => ({
@@ -56,5 +63,36 @@ describe("muscleLabel", () => {
   it("title-cases muscle names", () => {
     expect(muscleLabel("lower back")).toBe("Lower Back");
     expect(muscleLabel("hamstrings")).toBe("Hamstrings");
+  });
+});
+
+describe("expandMuscleSelection", () => {
+  it("expands a group token into its member muscles", () => {
+    expect(expandMuscleSelection(["back"]).sort()).toEqual(["lats", "lower back", "middle back"]);
+  });
+
+  it("passes individual muscles through unchanged", () => {
+    expect(expandMuscleSelection(["neck", "chest"]).sort()).toEqual(["chest", "neck"]);
+  });
+
+  it("de-duplicates when a group and one of its members are both selected", () => {
+    expect(expandMuscleSelection(["back", "lats"]).sort()).toEqual([
+      "lats",
+      "lower back",
+      "middle back",
+    ]);
+  });
+
+  it("returns an empty list for an empty selection", () => {
+    expect(expandMuscleSelection([])).toEqual([]);
+  });
+});
+
+describe("isMuscleGroup", () => {
+  it("distinguishes group names from individual muscles", () => {
+    expect(isMuscleGroup("legs")).toBe(true);
+    expect(isMuscleGroup("back")).toBe(true);
+    expect(isMuscleGroup("lats")).toBe(false);
+    expect(isMuscleGroup("lower back")).toBe(false);
   });
 });

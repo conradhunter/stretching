@@ -1,5 +1,34 @@
 import type { Stretch } from "./segments";
 
+/**
+ * "Looser" filter pills: each groups several specific muscles. Selecting a
+ * group matches any stretch hitting one of its members. Order here is the
+ * display order (pinned ahead of the individual muscle pills).
+ */
+export const MUSCLE_GROUPS: { name: string; muscles: string[] }[] = [
+  { name: "legs", muscles: ["hamstrings", "quadriceps", "calves", "glutes", "adductors", "abductors"] },
+  { name: "back", muscles: ["lower back", "lats", "middle back"] },
+  { name: "arms", muscles: ["biceps", "triceps", "forearms"] },
+];
+
+const GROUP_BY_NAME = new Map(MUSCLE_GROUPS.map((g) => [g.name, g.muscles]));
+
+/** True if `token` is a muscle-group name (vs an individual muscle). */
+export function isMuscleGroup(token: string): boolean {
+  return GROUP_BY_NAME.has(token);
+}
+
+/** Replaces any group token in `selected` with its member muscles, de-duplicated. */
+export function expandMuscleSelection(selected: string[]): string[] {
+  const out = new Set<string>();
+  for (const token of selected) {
+    const members = GROUP_BY_NAME.get(token);
+    if (members) members.forEach((m) => out.add(m));
+    else out.add(token);
+  }
+  return [...out];
+}
+
 /** Distinct muscles across the library, ordered by how many stretches use each (popularity). */
 export function allMuscles(stretches: Stretch[]): string[] {
   const freq = new Map<string, number>();

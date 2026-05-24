@@ -14,6 +14,7 @@ import {
   setQuickOption,
   useQuickRoutine,
 } from '@/routines/quickRoutine';
+import { itemsDuration } from '@/routines/resolve';
 import { createRoutine, updateRoutine } from '@/routines/store';
 import { stretches } from '@/stretches/library';
 import { formatDuration, optionDuration } from '@/stretches/segments';
@@ -24,7 +25,7 @@ export default function QuickRoutineScreen() {
   const items = useQuickRoutine();
 
   const saveAsRoutine = () => {
-    const routine = createRoutine('Quick routine');
+    const routine = createRoutine('New routine');
     updateRoutine(routine.id, (r) => ({ ...r, items: getQuickItems() }));
     clearQuick();
     router.replace({ pathname: '/routine/[id]', params: { id: routine.id } });
@@ -32,14 +33,18 @@ export default function QuickRoutineScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen options={{ title: 'Quick routine' }} />
+      <Stack.Screen options={{ title: 'Queue' }} />
       <ScrollView contentContainerStyle={styles.content}>
         {items.length === 0 ? (
           <ThemedText themeColor="textSecondary" style={styles.empty}>
-            No stretches yet. Tap + on a stretch to add it here.
+            Queue is empty. Tap + on a stretch to add it here.
           </ThemedText>
         ) : (
           <>
+            <ThemedText type="small" themeColor="textSecondary">
+              {items.length} {items.length === 1 ? 'stretch' : 'stretches'} ·{' '}
+              {formatDuration(itemsDuration(items))} total
+            </ThemedText>
             <View style={styles.list}>
               {items.map((item, index) => {
                 const stretch = stretches.find((s) => s.id === item.stretchId);

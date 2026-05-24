@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { moveItem, removeItem } from '@/routines/routines';
+import { itemsDuration } from '@/routines/resolve';
 import { deleteRoutine, updateRoutine, useRoutines } from '@/routines/store';
 import { stretches } from '@/stretches/library';
 import { formatDuration, optionDuration } from '@/stretches/segments';
@@ -41,6 +42,11 @@ export default function RoutineBuilderScreen() {
           placeholderTextColor={theme.textSecondary}
           style={[styles.name, { color: theme.text, borderColor: theme.border }]}
         />
+
+        <ThemedText type="small" themeColor="textSecondary">
+          {routine.items.length} {routine.items.length === 1 ? 'stretch' : 'stretches'}
+          {routine.items.length > 0 ? ` · ${formatDuration(itemsDuration(routine.items))}` : ''}
+        </ThemedText>
 
         <View style={styles.items}>
           {routine.items.map((item, index) => {

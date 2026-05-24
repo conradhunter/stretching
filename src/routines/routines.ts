@@ -1,5 +1,5 @@
 import type { Segment } from "../timer/engine";
-import { buildSegments, type Stretch, type TimeOption } from "../stretches/segments";
+import { buildSegments, optionDuration, type Stretch, type TimeOption } from "../stretches/segments";
 
 export type RoutineItem = { stretchId: string; optionIndex: number };
 export type Routine = { id: string; name: string; items: RoutineItem[] };
@@ -25,6 +25,14 @@ export function buildRoutineSegments(
     }
   }
   return out;
+}
+
+/** Total run length of a routine: prep + work for every item (matches buildRoutineSegments). */
+export function routineDuration(
+  items: ResolvedItem[],
+  prepSeconds: number = DEFAULT_PREP_SECONDS
+): number {
+  return items.reduce((total, { option }) => total + prepSeconds + optionDuration(option), 0);
 }
 
 export function addItem(routine: Routine, item: RoutineItem): Routine {

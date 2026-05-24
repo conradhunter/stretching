@@ -13,7 +13,8 @@ import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { stretchImages } from '@/stretches/images';
-import { buildRoutineSegments, type ResolvedItem } from '@/routines/routines';
+import { buildRoutineSegments } from '@/routines/routines';
+import { resolveItems } from '@/routines/resolve';
 import { getQuickItems } from '@/routines/quickRoutine';
 import { getRoutine } from '@/routines/store';
 import { stretches } from '@/stretches/library';
@@ -37,21 +38,12 @@ export default function RunScreen() {
     quick?: string;
   }>();
 
-  // Resolve a single stretch+option, a saved routine, or the quick cart into one plan.
+  // Resolve a single stretch+option, a saved routine, or the queue into one plan.
   const plan = useMemo(() => {
-    const resolveItems = (raw: { stretchId: string; optionIndex: number }[]) =>
-      raw
-        .map((it): ResolvedItem | null => {
-          const s = stretches.find((x) => x.id === it.stretchId);
-          const opt = s?.options[it.optionIndex];
-          return s && opt ? { stretch: s, option: opt } : null;
-        })
-        .filter((x): x is ResolvedItem => x !== null);
-
     if (quick) {
       const items = resolveItems(getQuickItems());
       if (items.length === 0) return null;
-      return { title: 'Quick routine', segments: buildRoutineSegments(items), fallbackImage: undefined };
+      return { title: 'Queue', segments: buildRoutineSegments(items), fallbackImage: undefined };
     }
 
     if (routineId) {

@@ -8,13 +8,16 @@ import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useQuickRoutine } from '@/routines/quickRoutine';
+import { itemsDuration } from '@/routines/resolve';
 import { createRoutine, useRoutines } from '@/routines/store';
+import { formatDuration } from '@/stretches/segments';
 
 export default function RoutinesScreen() {
   const theme = useTheme();
   const router = useRouter();
   const routines = useRoutines();
-  const quickCount = useQuickRoutine().length;
+  const quickItems = useQuickRoutine();
+  const quickCount = quickItems.length;
 
   const onNew = () => {
     const routine = createRoutine('New routine');
@@ -41,11 +44,12 @@ export default function RoutinesScreen() {
                 onPress={() => router.push('/quick-routine')}
                 style={({ pressed }) => [styles.quickWrap, pressed && styles.pressed]}>
                 <ThemedView type="backgroundSelected" bordered style={styles.row}>
-                  <SymbolView name="tray.full.fill" tintColor={theme.accent} size={22} />
+                  <SymbolView name="play.square.stack.fill" tintColor={theme.accent} size={22} />
                   <View style={styles.rowText}>
-                    <ThemedText type="default">Quick routine</ThemedText>
+                    <ThemedText type="default">Queue</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
-                      {quickCount} {quickCount === 1 ? 'stretch' : 'stretches'} · tap to run or save
+                      {quickCount} {quickCount === 1 ? 'stretch' : 'stretches'} ·{' '}
+                      {formatDuration(itemsDuration(quickItems))}
                     </ThemedText>
                   </View>
                   <SymbolView name="chevron.right" tintColor={theme.textSecondary} size={16} />
@@ -64,6 +68,7 @@ export default function RoutinesScreen() {
                   </ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
                     {item.items.length} {item.items.length === 1 ? 'stretch' : 'stretches'}
+                    {item.items.length > 0 ? ` · ${formatDuration(itemsDuration(item.items))}` : ''}
                   </ThemedText>
                 </View>
                 <SymbolView name="chevron.right" tintColor={theme.textSecondary} size={16} />

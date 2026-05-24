@@ -1,5 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { addItem, buildRoutineSegments, moveItem, removeItem, type Routine } from "./routines";
+import {
+  addItem,
+  buildRoutineSegments,
+  moveItem,
+  removeItem,
+  routineDuration,
+  type Routine,
+} from "./routines";
 
 describe("buildRoutineSegments", () => {
   const items = [
@@ -20,6 +27,23 @@ describe("buildRoutineSegments", () => {
   it("uses a configurable prep length", () => {
     const segments = buildRoutineSegments(items.slice(0, 1), 5);
     expect(segments[0]).toEqual({ label: "Next: Cat / Cow", seconds: 5, image: "cat-cow" });
+  });
+});
+
+describe("routineDuration", () => {
+  const items = [
+    { stretch: { name: "Cat / Cow", image: "cat-cow" }, option: { kind: "hold" as const, seconds: 30 } },
+    { stretch: { name: "Quad", image: "quad" }, option: { kind: "perSide" as const, secondsPerSide: 30 } },
+  ];
+
+  it("sums prep + work for every item (matches the real run length)", () => {
+    // (10 prep + 30 hold) + (10 prep + 2×30 per side) = 40 + 70
+    expect(routineDuration(items)).toBe(110);
+  });
+
+  it("honors a custom prep length and returns 0 for no items", () => {
+    expect(routineDuration(items.slice(0, 1), 0)).toBe(30);
+    expect(routineDuration([])).toBe(0);
   });
 });
 

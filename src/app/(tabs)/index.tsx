@@ -106,7 +106,7 @@ export default function StretchesScreen() {
             hitSlop={10}
             style={({ pressed }) => pressed && styles.pressed}>
             <View>
-              <SymbolView name="tray.full.fill" tintColor={theme.text} size={26} />
+              <SymbolView name="play.square.stack.fill" tintColor={theme.text} size={26} />
               {quickCount > 0 && (
                 <View style={[styles.badge, { backgroundColor: theme.text }]}>
                   <Text style={[styles.badgeText, { color: theme.background }]}>{quickCount}</Text>

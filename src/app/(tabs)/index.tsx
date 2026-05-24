@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -74,9 +74,9 @@ export default function StretchesScreen() {
                 <ThemedView
                   type={active ? 'backgroundSelected' : 'backgroundElement'}
                   style={[styles.pill, { borderColor: active ? theme.text : 'transparent' }]}>
-                  <ThemedText type="small" themeColor={active ? 'text' : 'textSecondary'}>
+                  <Text style={[styles.pillText, { color: active ? theme.text : theme.textSecondary }]}>
                     {muscleLabel(muscle)}
-                  </ThemedText>
+                  </Text>
                 </ThemedView>
               </Pressable>
             );
@@ -142,10 +142,13 @@ const styles = StyleSheet.create({
   pills: { gap: Spacing.two, paddingRight: Spacing.three },
   pill: {
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
+    paddingVertical: Spacing.two,
     borderRadius: Spacing.five,
     borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  pillText: { fontSize: 14, fontWeight: '500' },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.six },
   row: {
     flexDirection: 'row',

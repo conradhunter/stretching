@@ -34,3 +34,14 @@ export function addItem(routine: Routine, item: RoutineItem): Routine {
 export function removeItem(routine: Routine, index: number): Routine {
   return { ...routine, items: routine.items.filter((_, i) => i !== index) };
 }
+
+export function moveItem(routine: Routine, from: number, to: number): Routine {
+  const { items } = routine;
+  if (from < 0 || from >= items.length || to < 0 || to >= items.length || from === to) {
+    return routine;
+  }
+  const next = [...items];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved);
+  return { ...routine, items: next };
+}

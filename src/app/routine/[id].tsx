@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { removeItem } from '@/routines/routines';
+import { moveItem, removeItem } from '@/routines/routines';
 import { deleteRoutine, updateRoutine, useRoutines } from '@/routines/store';
 import { stretches } from '@/stretches/library';
 import { formatDuration, optionDuration } from '@/stretches/segments';
@@ -56,12 +56,40 @@ export default function RoutineBuilderScreen() {
                     {perSide ? ' · per side' : ''}
                   </ThemedText>
                 </View>
-                <Pressable
-                  onPress={() => updateRoutine(routine.id, (r) => removeItem(r, index))}
-                  hitSlop={10}
-                  style={({ pressed }) => pressed && styles.pressed}>
-                  <SymbolView name="minus.circle.fill" tintColor={theme.textSecondary} size={24} />
-                </Pressable>
+                <View style={styles.itemActions}>
+                  <Pressable
+                    disabled={index === 0}
+                    onPress={() => updateRoutine(routine.id, (r) => moveItem(r, index, index - 1))}
+                    hitSlop={8}
+                    style={({ pressed }) => pressed && styles.pressed}>
+                    <SymbolView
+                      name="chevron.up"
+                      tintColor={index === 0 ? theme.backgroundSelected : theme.textSecondary}
+                      size={18}
+                    />
+                  </Pressable>
+                  <Pressable
+                    disabled={index === routine.items.length - 1}
+                    onPress={() => updateRoutine(routine.id, (r) => moveItem(r, index, index + 1))}
+                    hitSlop={8}
+                    style={({ pressed }) => pressed && styles.pressed}>
+                    <SymbolView
+                      name="chevron.down"
+                      tintColor={
+                        index === routine.items.length - 1
+                          ? theme.backgroundSelected
+                          : theme.textSecondary
+                      }
+                      size={18}
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => updateRoutine(routine.id, (r) => removeItem(r, index))}
+                    hitSlop={8}
+                    style={({ pressed }) => pressed && styles.pressed}>
+                    <SymbolView name="minus.circle.fill" tintColor={theme.textSecondary} size={24} />
+                  </Pressable>
+                </View>
               </ThemedView>
             );
           })}
@@ -117,6 +145,7 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
   },
   itemText: { flex: 1, gap: Spacing.half },
+  itemActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   addRow: {
     flexDirection: 'row',
     alignItems: 'center',

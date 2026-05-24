@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { addItem, buildRoutineSegments, removeItem, type Routine } from "./routines";
+import { addItem, buildRoutineSegments, moveItem, removeItem, type Routine } from "./routines";
 
 describe("buildRoutineSegments", () => {
   const items = [
@@ -39,5 +39,28 @@ describe("routine item mutations", () => {
   it("removes an item by index", () => {
     const next = removeItem(base, 0);
     expect(next.items).toEqual([]);
+  });
+});
+
+describe("moveItem", () => {
+  const r: Routine = {
+    id: "r1",
+    name: "Morning",
+    items: [
+      { stretchId: "a", optionIndex: 0 },
+      { stretchId: "b", optionIndex: 0 },
+      { stretchId: "c", optionIndex: 0 },
+    ],
+  };
+
+  it("moves an item to a new position without mutating the original", () => {
+    expect(moveItem(r, 0, 1).items.map((i) => i.stretchId)).toEqual(["b", "a", "c"]);
+    expect(moveItem(r, 2, 0).items.map((i) => i.stretchId)).toEqual(["c", "a", "b"]);
+    expect(r.items.map((i) => i.stretchId)).toEqual(["a", "b", "c"]);
+  });
+
+  it("is a no-op when the target index is out of bounds", () => {
+    expect(moveItem(r, 0, -1)).toBe(r);
+    expect(moveItem(r, 2, 3)).toBe(r);
   });
 });

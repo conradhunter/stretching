@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -10,22 +10,24 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { stretchImages } from '@/stretches/images';
 import { stretches } from '@/stretches/library';
+import { MUSCLE_GROUPS, filterStretches } from '@/stretches/muscles';
 import type { Stretch } from '@/stretches/segments';
 
 export default function StretchesScreen() {
   const theme = useTheme();
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return stretches;
-    return stretches.filter(
-      (s) =>
-        s.name.toLowerCase().includes(q) ||
-        s.muscles.some((m) => m.toLowerCase().includes(q))
+  const filtered = useMemo(
+    () => filterStretches(stretches, query, selectedGroups),
+    [query, selectedGroups]
+  );
+
+  const toggleGroup = (name: string) =>
+    setSelectedGroups((prev) =>
+      prev.includes(name) ? prev.filter((g) => g !== name) : [...prev, name]
     );
-  }, [query]);
 
   return (
     <ThemedView style={styles.container}>
@@ -44,6 +46,27 @@ export default function StretchesScreen() {
             { backgroundColor: theme.backgroundElement, color: theme.text },
           ]}
         />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          style={styles.pillsScroll}
+          contentContainerStyle={styles.pills}>
+          {MUSCLE_GROUPS.map((group) => {
+            const active = selectedGroups.includes(group.name);
+            return (
+              <Pressable key={group.name} onPress={() => toggleGroup(group.name)}>
+                <ThemedView
+                  type={active ? 'backgroundSelected' : 'backgroundElement'}
+                  style={[styles.pill, { borderColor: active ? theme.text : 'transparent' }]}>
+                  <ThemedText type="small" themeColor={active ? 'text' : 'textSecondary'}>
+                    {group.name}
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
         <FlatList
           data={filtered}
           keyExtractor={(s) => s.id}
@@ -100,6 +123,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     fontSize: 16,
     marginBottom: Spacing.two,
+  },
+  pillsScroll: { flexGrow: 0, marginBottom: Spacing.two },
+  pills: { gap: Spacing.two, paddingRight: Spacing.three },
+  pill: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one,
+    borderRadius: Spacing.five,
+    borderWidth: 1,
   },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.six },
   row: {

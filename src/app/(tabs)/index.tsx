@@ -137,9 +137,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     fontSize: 16,
-    marginBottom: Spacing.two,
   },
-  pillsScroll: { flexGrow: 0, marginBottom: Spacing.two },
+  pillsScroll: { flexGrow: 0, marginTop: Spacing.two, marginBottom: Spacing.two },
   pills: { gap: Spacing.two, paddingRight: Spacing.three },
   pill: {
     paddingHorizontal: Spacing.three,

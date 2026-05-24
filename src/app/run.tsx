@@ -14,6 +14,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { stretchImages } from '@/stretches/images';
 import { buildRoutineSegments, type ResolvedItem } from '@/routines/routines';
+import { getQuickItems } from '@/routines/quickRoutine';
 import { getRoutine } from '@/routines/store';
 import { stretches } from '@/stretches/library';
 import { buildSegments, withLeadIn } from '@/stretches/segments';
@@ -29,24 +30,34 @@ export default function RunScreen() {
   useKeepAwake();
   const theme = useTheme();
   const router = useRouter();
-  const { id, option, routine: routineId } = useLocalSearchParams<{
+  const { id, option, routine: routineId, quick } = useLocalSearchParams<{
     id?: string;
     option?: string;
     routine?: string;
+    quick?: string;
   }>();
 
-  // Resolve either a single stretch+option or a whole routine into one plan.
+  // Resolve a single stretch+option, a saved routine, or the quick cart into one plan.
   const plan = useMemo(() => {
-    if (routineId) {
-      const routine = getRoutine(routineId);
-      if (!routine) return null;
-      const items = routine.items
+    const resolveItems = (raw: { stretchId: string; optionIndex: number }[]) =>
+      raw
         .map((it): ResolvedItem | null => {
           const s = stretches.find((x) => x.id === it.stretchId);
           const opt = s?.options[it.optionIndex];
           return s && opt ? { stretch: s, option: opt } : null;
         })
         .filter((x): x is ResolvedItem => x !== null);
+
+    if (quick) {
+      const items = resolveItems(getQuickItems());
+      if (items.length === 0) return null;
+      return { title: 'Quick routine', segments: buildRoutineSegments(items), fallbackImage: undefined };
+    }
+
+    if (routineId) {
+      const routine = getRoutine(routineId);
+      if (!routine) return null;
+      const items = resolveItems(routine.items);
       if (items.length === 0) return null;
       return { title: routine.name, segments: buildRoutineSegments(items), fallbackImage: undefined };
     }
@@ -60,7 +71,7 @@ export default function RunScreen() {
       image: stretch.image,
     });
     return { title: stretch.name, segments, fallbackImage: stretch.image };
-  }, [id, option, routineId]);
+  }, [id, option, routineId, quick]);
 
   // useTimer must run unconditionally; feed a harmless placeholder when invalid.
   const segments = plan?.segments ?? [{ label: '—', seconds: 1 }];

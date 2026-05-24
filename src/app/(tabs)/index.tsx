@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,24 +10,39 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { stretchImages } from '@/stretches/images';
 import { stretches } from '@/stretches/library';
-import { MUSCLE_GROUPS, filterStretches } from '@/stretches/muscles';
+import { bumpMuscle, useMuscleCounts } from '@/stretches/muscleUsage';
+import { allMuscles, filterStretches, muscleLabel, orderByUsage } from '@/stretches/muscles';
 import type { Stretch } from '@/stretches/segments';
 
 export default function StretchesScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const [query, setQuery] = useState('');
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const counts = useMuscleCounts();
+  const countsRef = useRef(counts);
+  countsRef.current = counts;
 
-  const filtered = useMemo(
-    () => filterStretches(stretches, query, selectedGroups),
-    [query, selectedGroups]
+  const [query, setQuery] = useState('');
+  const [selectedMuscles, setSelectedMuscles] = useState<string[]>([]);
+  // Snapshot the usage-ordered pills on focus, so tapping one doesn't reshuffle them live.
+  const [orderedMuscles, setOrderedMuscles] = useState<string[]>(() => allMuscles(stretches));
+
+  useFocusEffect(
+    useCallback(() => {
+      setOrderedMuscles(orderByUsage(allMuscles(stretches), countsRef.current));
+    }, [])
   );
 
-  const toggleGroup = (name: string) =>
-    setSelectedGroups((prev) =>
-      prev.includes(name) ? prev.filter((g) => g !== name) : [...prev, name]
-    );
+  const filtered = useMemo(
+    () => filterStretches(stretches, query, selectedMuscles),
+    [query, selectedMuscles]
+  );
+
+  const toggleMuscle = (muscle: string) =>
+    setSelectedMuscles((prev) => {
+      if (prev.includes(muscle)) return prev.filter((m) => m !== muscle);
+      bumpMuscle(muscle); // count only when selecting
+      return [...prev, muscle];
+    });
 
   return (
     <ThemedView style={styles.container}>
@@ -52,15 +67,15 @@ export default function StretchesScreen() {
           keyboardShouldPersistTaps="handled"
           style={styles.pillsScroll}
           contentContainerStyle={styles.pills}>
-          {MUSCLE_GROUPS.map((group) => {
-            const active = selectedGroups.includes(group.name);
+          {orderedMuscles.map((muscle) => {
+            const active = selectedMuscles.includes(muscle);
             return (
-              <Pressable key={group.name} onPress={() => toggleGroup(group.name)}>
+              <Pressable key={muscle} onPress={() => toggleMuscle(muscle)}>
                 <ThemedView
                   type={active ? 'backgroundSelected' : 'backgroundElement'}
                   style={[styles.pill, { borderColor: active ? theme.text : 'transparent' }]}>
                   <ThemedText type="small" themeColor={active ? 'text' : 'textSecondary'}>
-                    {group.name}
+                    {muscleLabel(muscle)}
                   </ThemedText>
                 </ThemedView>
               </Pressable>
@@ -80,7 +95,7 @@ export default function StretchesScreen() {
           )}
           ListEmptyComponent={
             <ThemedText themeColor="textSecondary" style={styles.empty}>
-              No stretches match “{query}”.
+              No stretches match your filters.
             </ThemedText>
           }
         />

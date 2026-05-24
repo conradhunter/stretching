@@ -1,30 +1,34 @@
 import type { Stretch } from "./segments";
 
-export type MuscleGroup = { name: string; muscles: string[] };
-
-// Buckets the library's ~16 primary muscles into a handful of browsable groups.
-// Keep in sync with the library — the test guards that every muscle is mapped.
-export const MUSCLE_GROUPS: MuscleGroup[] = [
-  { name: "Legs", muscles: ["hamstrings", "quadriceps", "calves", "glutes", "adductors", "abductors"] },
-  { name: "Back", muscles: ["lower back", "middle back", "lats"] },
-  { name: "Shoulders & Arms", muscles: ["shoulders", "triceps", "biceps", "forearms"] },
-  { name: "Chest", muscles: ["chest"] },
-  { name: "Core", muscles: ["abdominals"] },
-  { name: "Neck", muscles: ["neck"] },
-];
-
-function musclesForGroup(groupName: string): string[] {
-  return MUSCLE_GROUPS.find((g) => g.name === groupName)?.muscles ?? [];
+/** Distinct muscles across the library, ordered by how many stretches use each (popularity). */
+export function allMuscles(stretches: Stretch[]): string[] {
+  const freq = new Map<string, number>();
+  for (const stretch of stretches) {
+    for (const muscle of stretch.muscles) {
+      freq.set(muscle, (freq.get(muscle) ?? 0) + 1);
+    }
+  }
+  return [...freq.keys()].sort(
+    (a, b) => (freq.get(b) ?? 0) - (freq.get(a) ?? 0) || a.localeCompare(b)
+  );
 }
 
-/** Filters by a text query (name or muscle) AND, if any groups are selected, by group membership (OR). */
+/** Re-orders muscles by the user's tap counts (desc), keeping the base order for ties. */
+export function orderByUsage(muscles: string[], counts: Record<string, number>): string[] {
+  return muscles
+    .map((muscle, index) => ({ muscle, index }))
+    .sort((a, b) => (counts[b.muscle] ?? 0) - (counts[a.muscle] ?? 0) || a.index - b.index)
+    .map((x) => x.muscle);
+}
+
+/** Filters by a text query (name or muscle) AND, if any muscles are selected, by membership (OR). */
 export function filterStretches(
   stretches: Stretch[],
   query: string,
-  selectedGroups: string[]
+  selectedMuscles: string[]
 ): Stretch[] {
   const q = query.trim().toLowerCase();
-  const selectedMuscles = new Set(selectedGroups.flatMap(musclesForGroup));
+  const selected = new Set(selectedMuscles);
 
   return stretches.filter((stretch) => {
     const matchesQuery =
@@ -32,9 +36,13 @@ export function filterStretches(
       stretch.name.toLowerCase().includes(q) ||
       stretch.muscles.some((m) => m.toLowerCase().includes(q));
 
-    const matchesGroups =
-      selectedMuscles.size === 0 || stretch.muscles.some((m) => selectedMuscles.has(m));
+    const matchesMuscle = selected.size === 0 || stretch.muscles.some((m) => selected.has(m));
 
-    return matchesQuery && matchesGroups;
+    return matchesQuery && matchesMuscle;
   });
+}
+
+/** Title-cases a muscle name for display ("lower back" -> "Lower Back"). */
+export function muscleLabel(muscle: string): string {
+  return muscle.replace(/\b\w/g, (c) => c.toUpperCase());
 }

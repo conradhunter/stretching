@@ -7,12 +7,14 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useQuickRoutine } from '@/routines/quickRoutine';
 import { createRoutine, useRoutines } from '@/routines/store';
 
 export default function RoutinesScreen() {
   const theme = useTheme();
   const router = useRouter();
   const routines = useRoutines();
+  const quickCount = useQuickRoutine().length;
 
   const onNew = () => {
     const routine = createRoutine('New routine');
@@ -33,6 +35,24 @@ export default function RoutinesScreen() {
           data={routines}
           keyExtractor={(r) => r.id}
           contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            quickCount > 0 ? (
+              <Pressable
+                onPress={() => router.push('/quick-routine')}
+                style={({ pressed }) => [styles.quickWrap, pressed && styles.pressed]}>
+                <ThemedView type="backgroundSelected" style={styles.row}>
+                  <SymbolView name="tray.full.fill" tintColor={theme.text} size={22} />
+                  <View style={styles.rowText}>
+                    <ThemedText type="default">Quick routine</ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {quickCount} {quickCount === 1 ? 'stretch' : 'stretches'} · tap to run or save
+                    </ThemedText>
+                  </View>
+                  <SymbolView name="chevron.right" tintColor={theme.textSecondary} size={16} />
+                </ThemedView>
+              </Pressable>
+            ) : null
+          }
           renderItem={({ item }) => (
             <Pressable
               onPress={() => router.push({ pathname: '/routine/[id]', params: { id: item.id } })}
@@ -72,6 +92,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.three,
   },
   listContent: { gap: Spacing.two, paddingBottom: Spacing.six },
+  quickWrap: { marginBottom: Spacing.two },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

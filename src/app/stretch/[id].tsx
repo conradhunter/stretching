@@ -1,11 +1,14 @@
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { addToQuick } from '@/routines/quickRoutine';
 import { stretchImages } from '@/stretches/images';
 import { stretches } from '@/stretches/library';
 import { formatDuration, optionDuration, type TimeOption } from '@/stretches/segments';
@@ -34,7 +37,22 @@ export default function StretchDetailScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen options={{ title: stretch.name }} />
+      <Stack.Screen
+        options={{
+          title: stretch.name,
+          headerRight: () => (
+            <Pressable
+              onPress={() => {
+                addToQuick(stretch.id, 0);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              hitSlop={10}
+              style={({ pressed }) => pressed && styles.pressed}>
+              <SymbolView name="plus.circle.fill" tintColor={theme.text} size={26} />
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         {photos.length > 0 && (
           <View style={styles.photos}>

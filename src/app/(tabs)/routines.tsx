@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useQuickRoutine } from '@/routines/quickRoutine';
 import { createRoutine, useRoutines } from '@/routines/store';
@@ -27,7 +27,7 @@ export default function RoutinesScreen() {
         <View style={styles.header}>
           <ThemedText type="subtitle">Routines</ThemedText>
           <Pressable onPress={onNew} hitSlop={12} style={({ pressed }) => pressed && styles.pressed}>
-            <SymbolView name="plus.circle.fill" tintColor={theme.text} size={30} />
+            <SymbolView name="plus.circle.fill" tintColor={theme.accent} size={30} />
           </Pressable>
         </View>
 
@@ -40,8 +40,8 @@ export default function RoutinesScreen() {
               <Pressable
                 onPress={() => router.push('/quick-routine')}
                 style={({ pressed }) => [styles.quickWrap, pressed && styles.pressed]}>
-                <ThemedView type="backgroundSelected" style={styles.row}>
-                  <SymbolView name="tray.full.fill" tintColor={theme.text} size={22} />
+                <ThemedView type="backgroundSelected" bordered style={styles.row}>
+                  <SymbolView name="tray.full.fill" tintColor={theme.accent} size={22} />
                   <View style={styles.rowText}>
                     <ThemedText type="default">Quick routine</ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
@@ -57,7 +57,7 @@ export default function RoutinesScreen() {
             <Pressable
               onPress={() => router.push({ pathname: '/routine/[id]', params: { id: item.id } })}
               style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.row}>
+              <ThemedView type="backgroundElement" bordered style={styles.row}>
                 <View style={styles.rowText}>
                   <ThemedText type="default" numberOfLines={1}>
                     {item.name}
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
     padding: Spacing.three,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.lg,
   },
   rowText: { flex: 1, gap: Spacing.half },
   pressed: { opacity: 0.6 },

@@ -10,7 +10,7 @@ import { ImageLightbox } from '@/components/lightbox/image-lightbox';
 import { measureFrame } from '@/components/lightbox/measure';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { addToQuick } from '@/routines/quickRoutine';
 import { stretchImages } from '@/stretches/images';
@@ -63,7 +63,7 @@ export default function StretchDetailScreen() {
               }}
               hitSlop={10}
               style={({ pressed }) => pressed && styles.pressed}>
-              <SymbolView name="plus.circle.fill" tintColor={theme.text} size={26} />
+              <SymbolView name="plus.circle.fill" tintColor={theme.accent} size={26} />
             </Pressable>
           ),
         }}
@@ -90,7 +90,7 @@ export default function StretchDetailScreen() {
         {stretch.muscles.length > 0 && (
           <View style={styles.tags}>
             {stretch.muscles.map((m) => (
-              <ThemedView key={m} type="backgroundElement" style={styles.tag}>
+              <ThemedView key={m} type="backgroundElement" bordered style={styles.tag}>
                 <ThemedText type="small" themeColor="textSecondary">
                   {m}
                 </ThemedText>
@@ -99,7 +99,7 @@ export default function StretchDetailScreen() {
           </View>
         )}
 
-        <ThemedText type="smallBold" style={styles.label}>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
           CHOOSE A TIME
         </ThemedText>
         <View style={styles.options}>
@@ -112,7 +112,7 @@ export default function StretchDetailScreen() {
                   router.push({ pathname: '/run', params: { id: stretch.id, option: String(index) } })
                 }
                 style={({ pressed }) => [pressed && styles.pressed, styles.optionWrap]}>
-                <ThemedView type="backgroundElement" style={styles.option}>
+                <ThemedView type="backgroundElement" bordered style={styles.option}>
                   <ThemedText type="default">{title}</ThemedText>
                   {subtitle && (
                     <ThemedText type="small" themeColor="textSecondary">
@@ -127,7 +127,7 @@ export default function StretchDetailScreen() {
 
         {stretch.instructions.length > 0 && (
           <>
-            <ThemedText type="smallBold" style={styles.label}>
+            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
               HOW TO
             </ThemedText>
             <View style={styles.steps}>
@@ -164,16 +164,16 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.three, gap: Spacing.three, paddingBottom: Spacing.six },
   photos: { flexDirection: 'row', gap: Spacing.two },
   photoWrap: { flex: 1 },
-  photo: { width: '100%', aspectRatio: 850 / 567, borderRadius: Spacing.three },
+  photo: { width: '100%', aspectRatio: 850 / 567, borderRadius: Radius.lg },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  tag: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.one, borderRadius: Spacing.five },
-  label: { letterSpacing: 1, marginTop: Spacing.one },
+  tag: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.one, borderRadius: Radius.full },
+  label: { letterSpacing: 1, marginTop: Spacing.one, textTransform: 'uppercase' },
   options: { gap: Spacing.two },
   optionWrap: {},
   option: {
     paddingVertical: Spacing.three,
     paddingHorizontal: Spacing.four,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.lg,
     alignItems: 'center',
     gap: Spacing.half,
   },

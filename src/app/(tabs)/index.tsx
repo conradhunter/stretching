@@ -11,7 +11,7 @@ import { ImageLightbox } from '@/components/lightbox/image-lightbox';
 import { measureFrame } from '@/components/lightbox/measure';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BorderWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { addToQuick, useQuickRoutine } from '@/routines/quickRoutine';
 import { stretchImages } from '@/stretches/images';
@@ -77,9 +77,18 @@ export default function StretchesScreen() {
     return (
       <Pressable key={token} onPress={() => toggleMuscle(token)}>
         <ThemedView
-          type={active ? 'backgroundSelected' : 'backgroundElement'}
-          style={[styles.pill, { borderColor: active ? theme.text : 'transparent' }]}>
-          <Text style={[styles.pillText, { color: active ? theme.text : theme.textSecondary }]}>
+          type="backgroundElement"
+          style={[
+            styles.pill,
+            active
+              ? { backgroundColor: theme.accent, borderColor: theme.accent }
+              : { borderColor: theme.border },
+          ]}>
+          <Text
+            style={[
+              styles.pillText,
+              { color: active ? theme.accentForeground : theme.textSecondary },
+            ]}>
             {muscleLabel(token)}
           </Text>
         </ThemedView>
@@ -114,7 +123,7 @@ export default function StretchesScreen() {
           autoCorrect={false}
           style={[
             styles.search,
-            { backgroundColor: theme.backgroundElement, color: theme.text },
+            { backgroundColor: theme.backgroundElement, color: theme.text, borderColor: theme.border },
           ]}
         />
         <ScrollView
@@ -187,7 +196,7 @@ function StretchRow({
   };
 
   return (
-    <ThemedView type="backgroundElement" style={styles.row}>
+    <ThemedView type="backgroundElement" bordered style={styles.row}>
       <Pressable
         ref={thumbRef}
         onPress={photo ? openImage : undefined}
@@ -212,7 +221,7 @@ function StretchRow({
         onPress={onAdd}
         hitSlop={10}
         style={({ pressed }) => [styles.addBtn, pressed && styles.pressed]}>
-        <SymbolView name="plus.circle.fill" tintColor={theme.text} size={28} />
+        <SymbolView name="plus.circle.fill" tintColor={theme.accent} size={28} />
       </Pressable>
     </ThemedView>
   );
@@ -241,7 +250,8 @@ const styles = StyleSheet.create({
   },
   badgeText: { fontSize: 11, fontWeight: '700', lineHeight: 18 },
   search: {
-    borderRadius: Spacing.three,
+    borderRadius: Radius.md,
+    borderWidth: BorderWidth,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     fontSize: 16,
@@ -256,8 +266,8 @@ const styles = StyleSheet.create({
   pill: {
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    borderWidth: 1,
+    borderRadius: Radius.full,
+    borderWidth: BorderWidth,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -266,13 +276,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
+    gap: Spacing.three,
     padding: Spacing.two,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.lg,
   },
   rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   addBtn: { padding: Spacing.one },
-  thumb: { width: 64, height: 64, borderRadius: Spacing.two },
+  thumb: { width: 60, height: 60, borderRadius: Radius.md },
   rowText: { flex: 1, gap: Spacing.half },
   pressed: { opacity: 0.6 },
   empty: { textAlign: 'center', paddingTop: Spacing.five },

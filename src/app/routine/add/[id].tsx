@@ -5,7 +5,7 @@ import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BorderWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { addItem } from '@/routines/routines';
 import { updateRoutine } from '@/routines/store';
@@ -42,7 +42,10 @@ export default function AddStretchScreen() {
         value={query}
         onChangeText={setQuery}
         autoCorrect={false}
-        style={[styles.search, { backgroundColor: theme.backgroundElement, color: theme.text }]}
+        style={[
+          styles.search,
+          { backgroundColor: theme.backgroundElement, color: theme.text, borderColor: theme.border },
+        ]}
       />
       <FlatList
         data={filtered}
@@ -53,7 +56,7 @@ export default function AddStretchScreen() {
           const photo = stretchImages[item.image]?.[0];
           const open = expanded === item.id;
           return (
-            <ThemedView type="backgroundElement" style={styles.card}>
+            <ThemedView type="backgroundElement" bordered style={styles.card}>
               <Pressable
                 onPress={() => setExpanded(open ? null : item.id)}
                 style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
@@ -69,7 +72,7 @@ export default function AddStretchScreen() {
                       key={index}
                       onPress={() => add(item.id, index)}
                       style={({ pressed }) => pressed && styles.pressed}>
-                      <ThemedView type="backgroundSelected" style={styles.optionChip}>
+                      <ThemedView type="backgroundElement" bordered style={styles.optionChip}>
                         <ThemedText type="small">
                           {formatDuration(optionDuration(option))}
                           {option.kind === 'perSide' ? ' · per side' : ''}
@@ -93,15 +96,16 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.three,
     marginTop: Spacing.three,
     marginBottom: Spacing.two,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.md,
+    borderWidth: BorderWidth,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     fontSize: 16,
   },
   listContent: { gap: Spacing.two, paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
-  card: { borderRadius: Spacing.three, overflow: 'hidden' },
+  card: { borderRadius: Radius.lg, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, padding: Spacing.two },
-  thumb: { width: 56, height: 56, borderRadius: Spacing.two },
+  thumb: { width: 56, height: 56, borderRadius: Radius.md },
   rowName: { flex: 1 },
   options: {
     flexDirection: 'row',
@@ -110,6 +114,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingBottom: Spacing.three,
   },
-  optionChip: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.two, borderRadius: Spacing.five },
+  optionChip: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.two, borderRadius: Radius.full },
   pressed: { opacity: 0.6 },
 });

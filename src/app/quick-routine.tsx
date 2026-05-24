@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import {
   clearQuick,
@@ -50,7 +50,7 @@ export default function QuickRoutineScreen() {
                   setQuickOption(index, (item.optionIndex + 1) % stretch.options.length);
                 };
                 return (
-                  <ThemedView key={index} type="backgroundElement" style={styles.item}>
+                  <ThemedView key={index} type="backgroundElement" bordered style={styles.item}>
                     <View style={styles.itemText}>
                       <ThemedText numberOfLines={1}>{stretch?.name ?? 'Unknown'}</ThemedText>
                       <Pressable onPress={cycle} hitSlop={6}>
@@ -101,14 +101,16 @@ export default function QuickRoutineScreen() {
             <Pressable
               onPress={() => router.push({ pathname: '/run', params: { quick: '1' } })}
               style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundSelected" style={styles.start}>
-                <SymbolView name="play.fill" tintColor={theme.text} size={18} />
-                <ThemedText type="default">Start</ThemedText>
-              </ThemedView>
+              <View style={[styles.start, { backgroundColor: theme.accent }]}>
+                <SymbolView name="play.fill" tintColor={theme.accentForeground} size={18} />
+                <ThemedText type="default" style={{ color: theme.accentForeground, fontWeight: '600' }}>
+                  Start
+                </ThemedText>
+              </View>
             </Pressable>
 
             <Pressable onPress={saveAsRoutine} style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.secondary}>
+              <ThemedView type="backgroundElement" bordered style={styles.secondary}>
                 <ThemedText>Save as routine</ThemedText>
               </ThemedView>
             </Pressable>
@@ -135,7 +137,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
     padding: Spacing.three,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.lg,
   },
   itemText: { flex: 1, gap: Spacing.half },
   itemActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
@@ -145,13 +147,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.two,
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.md,
     marginTop: Spacing.two,
   },
   secondary: {
     alignItems: 'center',
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.md,
   },
   clear: { textAlign: 'center', paddingTop: Spacing.two },
   pressed: { opacity: 0.6 },

@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { stretchImages } from '@/stretches/images';
 import { buildRoutineSegments, type ResolvedItem } from '@/routines/routines';
@@ -133,15 +133,21 @@ export default function RunScreen() {
         <ThemedText type="subtitle" style={styles.segLabel}>
           {done ? 'Done' : label}
         </ThemedText>
-        <ThemedText style={[styles.clock, isPrep && !done && { color: theme.textSecondary }]}>
+        <ThemedText
+          style={[
+            styles.clock,
+            { color: done ? theme.text : isPrep ? theme.textSecondary : theme.accent },
+          ]}>
           {clock(timer.remaining)}
         </ThemedText>
 
         {done ? (
           <Pressable onPress={() => router.back()} style={({ pressed }) => pressed && styles.pressed}>
-            <ThemedView type="backgroundElement" style={styles.doneButton}>
-              <ThemedText type="default">Finish</ThemedText>
-            </ThemedView>
+            <View style={[styles.doneButton, { backgroundColor: theme.accent }]}>
+              <ThemedText type="default" style={{ color: theme.accentForeground, fontWeight: '600' }}>
+                Finish
+              </ThemedText>
+            </View>
           </Pressable>
         ) : (
           <View style={styles.controls}>
@@ -149,6 +155,7 @@ export default function RunScreen() {
               icon={timer.status === 'paused' ? 'play.fill' : 'pause.fill'}
               label={timer.status === 'paused' ? 'Resume' : 'Pause'}
               onPress={timer.status === 'paused' ? timer.resume : timer.pause}
+              primary
             />
             <ControlButton icon="forward.fill" label="Skip" onPress={timer.skip} />
           </View>
@@ -162,17 +169,22 @@ function ControlButton({
   icon,
   label,
   onPress,
+  primary,
 }: {
   icon: SymbolViewProps['name'];
   label: string;
   onPress: () => void;
+  primary?: boolean;
 }) {
   const theme = useTheme();
   return (
     <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
       <View style={styles.controlButton}>
-        <ThemedView type="backgroundElement" style={styles.controlCircle}>
-          <SymbolView name={icon} tintColor={theme.text} size={28} />
+        <ThemedView
+          type="backgroundElement"
+          bordered={!primary}
+          style={[styles.controlCircle, primary && { backgroundColor: theme.accent }]}>
+          <SymbolView name={icon} tintColor={primary ? theme.accentForeground : theme.text} size={28} />
         </ThemedView>
         <ThemedText type="small" themeColor="textSecondary">
           {label}
@@ -187,9 +199,9 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.two },
   safeArea: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.three, padding: Spacing.four },
   close: { position: 'absolute', top: Spacing.five, right: Spacing.four, zIndex: 1 },
-  photo: { width: '100%', aspectRatio: 850 / 567, borderRadius: Spacing.four },
+  photo: { width: '100%', aspectRatio: 850 / 567, borderRadius: Radius.lg },
   segLabel: { textAlign: 'center' },
-  clock: { fontSize: 80, fontWeight: '700', fontVariant: ['tabular-nums'], lineHeight: 88 },
+  clock: { fontSize: 80, fontWeight: '700', fontVariant: ['tabular-nums'], lineHeight: 88, letterSpacing: -1 },
   controls: { flexDirection: 'row', gap: Spacing.six },
   controlButton: { alignItems: 'center', gap: Spacing.one },
   controlCircle: {
@@ -202,7 +214,8 @@ const styles = StyleSheet.create({
   doneButton: {
     paddingVertical: Spacing.three,
     paddingHorizontal: Spacing.six,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.md,
+    alignItems: 'center',
   },
   pressed: { opacity: 0.6 },
 });

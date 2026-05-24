@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
+import { BorderWidth } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function TabsLayout() {
@@ -9,9 +10,13 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.text,
+        tabBarActiveTintColor: theme.accent,
         tabBarInactiveTintColor: theme.textSecondary,
-        tabBarStyle: { backgroundColor: theme.background },
+        tabBarStyle: {
+          backgroundColor: theme.background,
+          borderTopColor: theme.border,
+          borderTopWidth: BorderWidth,
+        },
       }}>
       <Tabs.Screen
         name="index"

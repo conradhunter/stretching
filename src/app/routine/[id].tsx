@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { moveItem, removeItem } from '@/routines/routines';
 import { deleteRoutine, updateRoutine, useRoutines } from '@/routines/store';
@@ -39,7 +39,7 @@ export default function RoutineBuilderScreen() {
           onChangeText={(name) => updateRoutine(routine.id, (r) => ({ ...r, name }))}
           placeholder="Routine name"
           placeholderTextColor={theme.textSecondary}
-          style={[styles.name, { color: theme.text, borderColor: theme.backgroundElement }]}
+          style={[styles.name, { color: theme.text, borderColor: theme.border }]}
         />
 
         <View style={styles.items}>
@@ -48,7 +48,7 @@ export default function RoutineBuilderScreen() {
             const option = stretch?.options[item.optionIndex];
             const perSide = option?.kind === 'perSide';
             return (
-              <ThemedView key={index} type="backgroundElement" style={styles.item}>
+              <ThemedView key={index} type="backgroundElement" bordered style={styles.item}>
                 <View style={styles.itemText}>
                   <ThemedText numberOfLines={1}>{stretch?.name ?? 'Unknown'}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
@@ -97,8 +97,8 @@ export default function RoutineBuilderScreen() {
           <Pressable
             onPress={() => router.push({ pathname: '/routine/add/[id]', params: { id: routine.id } })}
             style={({ pressed }) => pressed && styles.pressed}>
-            <ThemedView type="backgroundElement" style={styles.addRow}>
-              <SymbolView name="plus" tintColor={theme.text} size={18} />
+            <ThemedView type="backgroundElement" bordered style={styles.addRow}>
+              <SymbolView name="plus" tintColor={theme.accent} size={18} />
               <ThemedText>Add stretch</ThemedText>
             </ThemedView>
           </Pressable>
@@ -108,12 +108,17 @@ export default function RoutineBuilderScreen() {
           disabled={routine.items.length === 0}
           onPress={() => router.push({ pathname: '/run', params: { routine: routine.id } })}
           style={({ pressed }) => pressed && styles.pressed}>
-          <ThemedView
-            type="backgroundSelected"
-            style={[styles.start, routine.items.length === 0 && styles.disabled]}>
-            <SymbolView name="play.fill" tintColor={theme.text} size={18} />
-            <ThemedText type="default">Start routine</ThemedText>
-          </ThemedView>
+          <View
+            style={[
+              styles.start,
+              { backgroundColor: theme.accent },
+              routine.items.length === 0 && styles.disabled,
+            ]}>
+            <SymbolView name="play.fill" tintColor={theme.accentForeground} size={18} />
+            <ThemedText type="default" style={{ color: theme.accentForeground, fontWeight: '600' }}>
+              Start routine
+            </ThemedText>
+          </View>
         </Pressable>
 
         <Pressable onPress={onDelete} style={({ pressed }) => pressed && styles.pressed}>
@@ -142,7 +147,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
     padding: Spacing.three,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.lg,
   },
   itemText: { flex: 1, gap: Spacing.half },
   itemActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
@@ -151,7 +156,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
     padding: Spacing.three,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.md,
   },
   start: {
     flexDirection: 'row',
@@ -159,7 +164,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.two,
     paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.md,
     marginTop: Spacing.two,
   },
   disabled: { opacity: 0.4 },

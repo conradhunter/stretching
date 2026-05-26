@@ -6,7 +6,7 @@ import * as Speech from 'expo-speech';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useEffect, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -32,6 +32,9 @@ export default function RunScreen() {
   useKeepAwake();
   const theme = useTheme();
   const router = useRouter();
+  // fullScreenModal: the SafeAreaView component reads 0 top inset here, so pull
+  // the raw insets and pad the chrome ourselves (close button clears the clock).
+  const insets = useSafeAreaInsets();
   const { id, option, routine: routineId, quick } = useLocalSearchParams<{
     id?: string;
     option?: string;
@@ -135,7 +138,7 @@ export default function RunScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <View style={[styles.safeArea, { paddingTop: insets.top + Spacing.two, paddingBottom: insets.bottom }]}>
         <View style={[styles.topBar, { borderBottomColor: theme.border }]}>
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.topBarSide}>
             <SymbolView name="xmark" tintColor={theme.textSecondary} size={22} />
@@ -190,7 +193,7 @@ export default function RunScreen() {
             </View>
           )}
         </View>
-      </SafeAreaView>
+      </View>
     </ThemedView>
   );
 }

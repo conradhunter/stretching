@@ -9,22 +9,30 @@ or build a routine — it counts down hands-free with voice + haptic cues.
   `scripts/build-library.ts` (`src/stretches/`, photos in `assets/stretches/`).
 - **Routines** — build, reorder, persist (AsyncStorage), play guided (`src/routines/`).
 
-## Develop & iterate (free — no Apple account)
+## Develop & iterate
 
-The fastest loop, and **free for as long as you like** — runs inside **Expo Go**:
+Iteration runs through a **dev client** — Expo Go does **not** work (this SDK is newer
+than public Expo Go). The dev client and your standalone app use **different bundle IDs**
+("app variants"), so they install side by side without overwriting each other:
+
+| App on the phone | Bundle ID | Built from |
+|---|---|---|
+| **Stretches Dev** — hot-reload | `com.conradhunter.stretching.dev` | `development` profile |
+| **Stretches** — standalone daily driver | `com.conradhunter.stretching` | `preview` profile |
 
 ```bash
 bun install
-bunx expo start        # press i, or scan the QR with Expo Go on your iPhone
+bunx eas-cli@latest build --profile development -p ios   # build "Stretches Dev" (once)
+#   install it from the printed QR/URL on your iPhone, then:
+bun run start:dev      # Metro with APP_VARIANT=development — scan the QR with Stretches Dev
 ```
 
-Install **Expo Go** from the App Store first. Edits hot-reload instantly. The whole
-app (voice, haptics, keep-awake, storage, SF Symbols) runs in Expo Go, so this needs
-no Apple Developer account — ideal for testing for a few days before committing to a
-standalone build.
+Edits hot-reload instantly. `app.config.ts` reads `app.json` as its base and switches
+bundle ID / name / scheme by the `APP_VARIANT` env var (set per profile in `eas.json`),
+which is why the dev client and standalone don't clobber each other.
 
 ```bash
-bun test          # run the test suite (engine, hook, library, routines)
+bun test          # run the test suite (engine, hook, library, routines, tracking)
 bunx tsc --noEmit # typecheck
 ```
 
@@ -40,8 +48,8 @@ This produces a real home-screen app via **internal/ad-hoc distribution** (~1-ye
 provisioning — no TestFlight 90-day expiry).
 
 > **Requires the paid [Apple Developer Program](https://developer.apple.com/programs/) ($99/yr)** —
-> ad-hoc distribution does not work with a free Apple ID. (For free iteration, use
-> Expo Go above.) Also needs a free [Expo account](https://expo.dev).
+> ad-hoc distribution does not work with a free Apple ID. (The dev client above needs it
+> too, since both are ad-hoc builds.) Also needs a free [Expo account](https://expo.dev).
 
 ### Initial setup (run once)
 
@@ -72,8 +80,10 @@ bunx eas-cli@latest build -p ios --profile preview
 
 ## Build profiles (`eas.json`)
 
-| Profile | Use |
-|---|---|
-| `development` | dev client build (internal) for on-device debugging |
-| `preview` | **internal/ad-hoc standalone app** — what you install on your phone |
-| `production` | store-ready build (not needed for personal use) |
+Each profile sets `APP_VARIANT` (consumed by `app.config.ts`) to pick its bundle ID / name / scheme:
+
+| Profile | `APP_VARIANT` | Builds |
+|---|---|---|
+| `development` | `development` | **"Stretches Dev"** (`…stretching.dev`) — dev client for hot-reload; coexists with the standalone |
+| `preview` | `preview` | **"Stretches"** (`…stretching`, internal/ad-hoc) — the standalone you install for daily use |
+| `production` | `production` | store-ready build (not needed for personal use) |

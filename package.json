@@ -1,5 +1,5 @@
 {
-  "name": "stretching-pwa",
+  "name": "stretching",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
@@ -43,6 +43,7 @@
   },
   "scripts": {
     "start": "expo start",
+    "start:dev": "APP_VARIANT=development expo start --dev-client",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",

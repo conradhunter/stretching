@@ -14,7 +14,7 @@ Personal, single-user stretching-timer app (one user, on their own iPhone). Pick
 bun install
 bun test src          # test suite (bun's runner; happy-dom for hook tests)
 bunx tsc --noEmit     # typecheck (see "known tsc noise" below)
-bunx expo start --dev-client   # dev server for the installed dev build; scan QR
+bun run start:dev              # Metro for the "Stretches Dev" client (sets APP_VARIANT); scan QR
 bunx expo run:ios --device     # local build to the physical iPhone (needs Xcode 26.5)
 bun run scripts/build-library.ts  # regenerate the stretch library + photos
 ```
@@ -40,8 +40,12 @@ Expo Go does NOT work (this SDK is newer than public Expo Go) — use a **dev cl
 - **Local iOS builds require Xcode 26.5 / Swift 6.2+** (project is on the iOS 26 generation). EAS cloud builds work regardless; that's how it gets on the phone.
 - **Two `tsc` errors are expected**: `global.css` + an `animated-icon.module.css` import in template files — Expo generates their declarations on `expo start`. Anything else is real.
 
-## Distribution
-- Iterate: dev client + `expo start --dev-client` (QR, hot reload) or local `expo run:ios --device`.
-- Standalone install: EAS `preview` profile (internal/ad-hoc, ~1yr). `eas.json` has `development`/`preview`/`production`. Needs the paid Apple Developer account. See README for the runbook.
+## Distribution & app variants
+- **`app.config.ts`** reads `app.json` as its base and switches **bundle ID + name + scheme** by the `APP_VARIANT` env var (set per profile in `eas.json`):
+  - `development` → `com.conradhunter.stretching.dev` / "Stretches Dev" / scheme `stretching-dev`.
+  - `preview` & `production` → `com.conradhunter.stretching` / "Stretches" / scheme `stretching`.
+  - Different bundle IDs ⇒ the dev client and the standalone **coexist** on-device instead of overwriting each other (the bug that prompted this setup).
+- Iterate: build the `development` dev client once (`eas build --profile development -p ios`), install "Stretches Dev", then `bun run start:dev` (QR, hot reload). The script sets `APP_VARIANT=development` so the QR's deep-link scheme matches the dev client. (`bunx expo run:ios --device` also works but needs Xcode 26.5.)
+- Standalone daily-driver: EAS `preview` profile (internal/ad-hoc, ~1yr). Needs the paid Apple Developer account. See README for the runbook.
 
 Design decisions & rationale live in this project's Claude memory (`MEMORY.md`).

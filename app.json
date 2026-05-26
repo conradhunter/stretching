@@ -7,6 +7,12 @@
     "icon": "./assets/images/icon.png",
     "scheme": "stretching",
     "userInterfaceStyle": "automatic",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/aade6369-a93a-486a-a8ff-b96e9221559d"
+    },
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.conradhunter.stretching",

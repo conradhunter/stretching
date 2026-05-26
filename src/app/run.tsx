@@ -4,13 +4,13 @@ import { useKeepAwake } from 'expo-keep-awake';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Radius, Spacing } from '@/constants/theme';
+import { BorderWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { stretchImages } from '@/stretches/images';
 import { buildRoutineSegments } from '@/routines/routines';
@@ -19,6 +19,7 @@ import { getQuickItems } from '@/routines/quickRoutine';
 import { getRoutine } from '@/routines/store';
 import { stretches } from '@/stretches/library';
 import { buildSegments, withLeadIn } from '@/stretches/segments';
+import { recordStretchSeconds } from '@/tracking/store';
 import { useTimer } from '@/timer/useTimer';
 
 function clock(seconds: number): string {
@@ -61,12 +62,13 @@ export default function RunScreen() {
       label: 'Get ready',
       seconds: 3,
       image: stretch.image,
+      prep: true,
     });
     return { title: stretch.name, segments, fallbackImage: stretch.image };
   }, [id, option, routineId, quick]);
 
   // useTimer must run unconditionally; feed a harmless placeholder when invalid.
-  const segments = plan?.segments ?? [{ label: '—', seconds: 1 }];
+  const segments = plan?.segments ?? [{ label: '—', seconds: 1, prep: true }];
 
   const timer = useTimer(segments, {
     onEvent: (event) => {
@@ -85,6 +87,16 @@ export default function RunScreen() {
     Speech.stop();
     Speech.speak(timer.currentSegment.label);
   }, [plan, timer.currentSegment.label]);
+
+  // Credit stretched time toward the daily goal when leaving the run — once,
+  // with the cumulative total, so finishing and bailing early are both captured.
+  const elapsedRef = useRef(0);
+  elapsedRef.current = timer.elapsedStretchSeconds;
+  useEffect(() => {
+    return () => {
+      recordStretchSeconds(elapsedRef.current);
+    };
+  }, []);
 
   // Stop any speech when leaving the screen.
   useEffect(() => {
@@ -107,51 +119,77 @@ export default function RunScreen() {
   const label = timer.currentSegment.label;
   const imageKey = timer.currentSegment.image ?? plan.fallbackImage;
   const photo = imageKey ? stretchImages[imageKey]?.[0] : undefined;
-  const isPrep = label === 'Get ready' || label.startsWith('Next:');
+  const isPrep = timer.currentSegment.prep === true;
   const done = timer.status === 'completed';
+  const paused = timer.status === 'paused';
+
+  // Position within the routine counts work segments only — the "Get ready" /
+  // "Next: …" prep beats don't get their own number (matches Bend's "1 of 8").
+  const workTotal = segments.filter((s) => !s.prep).length;
+  const workBefore = segments.slice(0, timer.segmentIndex).filter((s) => !s.prep).length;
+  const position = Math.min(workBefore + 1, workTotal);
+
+  // Current hold's progress, 0..1, filling as it elapses — drives the bar over the photo.
+  const segSeconds = timer.currentSegment.seconds;
+  const progress = done ? 1 : segSeconds > 0 ? (segSeconds - timer.remaining) / segSeconds : 0;
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Pressable onPress={() => router.back()} style={styles.close} hitSlop={12}>
-          <SymbolView name="xmark" tintColor={theme.textSecondary} size={22} />
-        </Pressable>
-
-        {photo && <Image source={photo} style={styles.photo} contentFit="cover" />}
-
-        <ThemedText type="small" themeColor="textSecondary">
-          {plan.title} · {timer.segmentIndex + 1}/{segments.length}
-        </ThemedText>
-        <ThemedText type="subtitle" style={styles.segLabel}>
-          {done ? 'Done' : label}
-        </ThemedText>
-        <ThemedText
-          style={[
-            styles.clock,
-            { color: done ? theme.text : isPrep ? theme.textSecondary : theme.accent },
-          ]}>
-          {clock(timer.remaining)}
-        </ThemedText>
-
-        {done ? (
-          <Pressable onPress={() => router.back()} style={({ pressed }) => pressed && styles.pressed}>
-            <View style={[styles.doneButton, { backgroundColor: theme.accent }]}>
-              <ThemedText type="default" style={{ color: theme.accentForeground, fontWeight: '600' }}>
-                Finish
-              </ThemedText>
-            </View>
+        <View style={[styles.topBar, { borderBottomColor: theme.border }]}>
+          <Pressable onPress={() => router.back()} hitSlop={12} style={styles.topBarSide}>
+            <SymbolView name="xmark" tintColor={theme.textSecondary} size={22} />
           </Pressable>
-        ) : (
-          <View style={styles.controls}>
-            <ControlButton
-              icon={timer.status === 'paused' ? 'play.fill' : 'pause.fill'}
-              label={timer.status === 'paused' ? 'Resume' : 'Pause'}
-              onPress={timer.status === 'paused' ? timer.resume : timer.pause}
-              primary
-            />
-            <ControlButton icon="forward.fill" label="Skip" onPress={timer.skip} />
-          </View>
-        )}
+          <ThemedText type="default" style={styles.position}>
+            {position} of {workTotal}
+          </ThemedText>
+          <View style={styles.topBarSide} />
+        </View>
+
+        <View style={styles.content}>
+          {photo && (
+            <View style={styles.photoBlock}>
+              <View style={[styles.track, { backgroundColor: theme.border }]}>
+                <View
+                  style={[
+                    styles.fill,
+                    { backgroundColor: theme.textSecondary, width: `${Math.round(progress * 100)}%` },
+                  ]}
+                />
+              </View>
+              <Image source={photo} style={styles.photo} contentFit="cover" />
+            </View>
+          )}
+
+          <ThemedText type="subtitle" style={styles.segLabel}>
+            {done ? 'Done' : label}
+          </ThemedText>
+          <ThemedText style={[styles.clock, { color: isPrep && !done ? theme.textSecondary : theme.text }]}>
+            {clock(timer.remaining)}
+          </ThemedText>
+        </View>
+
+        <View style={styles.footer}>
+          {done ? (
+            <Pressable onPress={() => router.back()} style={({ pressed }) => pressed && styles.pressed}>
+              <View style={[styles.doneButton, { backgroundColor: theme.accent }]}>
+                <ThemedText type="default" style={{ color: theme.accentForeground, fontWeight: '600' }}>
+                  Finish
+                </ThemedText>
+              </View>
+            </Pressable>
+          ) : (
+            <View style={styles.controls}>
+              <ControlButton icon="backward.fill" onPress={timer.previous} />
+              <ControlButton
+                icon={paused ? 'play.fill' : 'pause.fill'}
+                onPress={paused ? timer.resume : timer.pause}
+                size={76}
+              />
+              <ControlButton icon="forward.fill" onPress={timer.skip} />
+            </View>
+          )}
+        </View>
       </SafeAreaView>
     </ThemedView>
   );
@@ -159,29 +197,26 @@ export default function RunScreen() {
 
 function ControlButton({
   icon,
-  label,
   onPress,
-  primary,
+  size = 60,
 }: {
   icon: SymbolViewProps['name'];
-  label: string;
   onPress: () => void;
-  primary?: boolean;
+  size?: number;
 }) {
   const theme = useTheme();
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
-      <View style={styles.controlButton}>
-        <ThemedView
-          type="backgroundElement"
-          bordered={!primary}
-          style={[styles.controlCircle, primary && { backgroundColor: theme.accent }]}>
-          <SymbolView name={icon} tintColor={primary ? theme.accentForeground : theme.text} size={28} />
-        </ThemedView>
-        <ThemedText type="small" themeColor="textSecondary">
-          {label}
-        </ThemedText>
-      </View>
+    <Pressable onPress={onPress} hitSlop={8} style={({ pressed }) => pressed && styles.pressed}>
+      <ThemedView
+        type="backgroundElement"
+        bordered
+        style={[
+          styles.controlCircle,
+          styles.float,
+          { width: size, height: size, borderRadius: size / 2 },
+        ]}>
+        <SymbolView name={icon} tintColor={theme.text} size={size * 0.4} />
+      </ThemedView>
     </Pressable>
   );
 }
@@ -189,19 +224,39 @@ function ControlButton({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.two },
-  safeArea: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.three, padding: Spacing.four },
-  close: { position: 'absolute', top: Spacing.five, right: Spacing.four, zIndex: 1 },
+  safeArea: { flex: 1 },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.four,
+    paddingBottom: Spacing.three,
+    borderBottomWidth: BorderWidth,
+  },
+  topBarSide: { width: 40 },
+  position: { fontWeight: '600' },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.four,
+    paddingHorizontal: Spacing.four,
+  },
+  photoBlock: { width: '100%', alignItems: 'center', gap: Spacing.three },
+  track: { width: '100%', height: 4, borderRadius: Radius.full, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: Radius.full },
   photo: { width: '100%', aspectRatio: 850 / 567, borderRadius: Radius.lg },
   segLabel: { textAlign: 'center' },
   clock: { fontSize: 80, fontWeight: '700', fontVariant: ['tabular-nums'], lineHeight: 88, letterSpacing: -1 },
-  controls: { flexDirection: 'row', gap: Spacing.six },
-  controlButton: { alignItems: 'center', gap: Spacing.one },
-  controlCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
+  footer: { paddingBottom: Spacing.four, alignItems: 'center' },
+  controls: { flexDirection: 'row', gap: Spacing.five, alignItems: 'center' },
+  controlCircle: { alignItems: 'center', justifyContent: 'center' },
+  float: {
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   doneButton: {
     paddingVertical: Spacing.three,

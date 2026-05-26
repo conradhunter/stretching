@@ -1,4 +1,4 @@
-export type Segment = { label: string; seconds: number; image?: string };
+export type Segment = { label: string; seconds: number; image?: string; prep?: boolean };
 export type TimerStatus = "running" | "paused" | "completed";
 
 export type TimerState = {
@@ -6,6 +6,8 @@ export type TimerState = {
   segmentIndex: number;
   remaining: number;
   segments: Segment[];
+  // Seconds actually ticked on non-prep segments — excludes prep, pause, skip.
+  elapsedStretchSeconds: number;
 };
 
 export type TimerEvent =
@@ -20,6 +22,7 @@ export function createTimer(segments: Segment[]): TimerState {
     segmentIndex: 0,
     remaining: segments[0].seconds,
     segments,
+    elapsedStretchSeconds: 0,
   };
 }
 
@@ -28,12 +31,19 @@ export function tick(state: TimerState): TickResult {
     return { state, events: [] };
   }
 
-  const remaining = state.remaining - 1;
+  // This tick consumed one second of the current segment; credit it as stretched
+  // time unless that segment is a prep ("Get ready" / "Next: …") countdown.
+  const isPrep = state.segments[state.segmentIndex].prep === true;
+  const counted: TimerState = isPrep
+    ? state
+    : { ...state, elapsedStretchSeconds: state.elapsedStretchSeconds + 1 };
+
+  const remaining = counted.remaining - 1;
   if (remaining > 0) {
-    return { state: { ...state, remaining }, events: [] };
+    return { state: { ...counted, remaining }, events: [] };
   }
 
-  return endCurrentSegment(state);
+  return endCurrentSegment(counted);
 }
 
 export function skip(state: TimerState): TickResult {
@@ -42,6 +52,21 @@ export function skip(state: TimerState): TickResult {
   }
 
   return endCurrentSegment(state);
+}
+
+export function previous(state: TimerState): TickResult {
+  if (state.status === "completed") {
+    return { state, events: [] };
+  }
+
+  // Go to the start of the prior segment; at the first segment, restart it.
+  // Keeps the running/paused status and the accumulated stretched time.
+  const prevIndex = Math.max(0, state.segmentIndex - 1);
+  const segment = state.segments[prevIndex];
+  return {
+    state: { ...state, segmentIndex: prevIndex, remaining: segment.seconds },
+    events: [{ type: "segment-advance", index: prevIndex, segment }],
+  };
 }
 
 export function pause(state: TimerState): TimerState {

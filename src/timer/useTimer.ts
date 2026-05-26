@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createTimer,
   pause,
+  previous,
   resume,
   skip,
   tick,
@@ -21,9 +22,11 @@ export type UseTimer = {
   segmentIndex: number;
   remaining: number;
   currentSegment: Segment;
+  elapsedStretchSeconds: number;
   pause: () => void;
   resume: () => void;
   skip: () => void;
+  previous: () => void;
 };
 
 export function useTimer(segments: Segment[], options: UseTimerOptions = {}): UseTimer {
@@ -61,14 +64,20 @@ export function useTimer(segments: Segment[], options: UseTimerOptions = {}): Us
     () => applyResult(skip(stateRef.current)),
     [applyResult]
   );
+  const previousTimer = useCallback(
+    () => applyResult(previous(stateRef.current)),
+    [applyResult]
+  );
 
   return {
     status: state.status,
     segmentIndex: state.segmentIndex,
     remaining: state.remaining,
     currentSegment: state.segments[state.segmentIndex],
+    elapsedStretchSeconds: state.elapsedStretchSeconds,
     pause: pauseTimer,
     resume: resumeTimer,
     skip: skipTimer,
+    previous: previousTimer,
   };
 }

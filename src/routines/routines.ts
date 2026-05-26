@@ -19,7 +19,7 @@ export function buildRoutineSegments(
 ): Segment[] {
   const out: Segment[] = [];
   for (const { stretch, option } of items) {
-    out.push({ label: `Next: ${stretch.name}`, seconds: prepSeconds, image: stretch.image });
+    out.push({ label: `Next: ${stretch.name}`, seconds: prepSeconds, image: stretch.image, prep: true });
     for (const segment of buildSegments(stretch, option)) {
       out.push({ ...segment, image: stretch.image });
     }

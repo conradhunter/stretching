@@ -2,12 +2,12 @@ import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import * as Speech from 'expo-speech';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useEffect, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { playChime } from '@/audio/chime';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BorderWidth, Radius, Spacing } from '@/constants/theme';
@@ -75,21 +75,23 @@ export default function RunScreen() {
 
   const timer = useTimer(segments, {
     onEvent: (event) => {
+      playChime();
       if (event.type === 'segment-advance') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Speech.speak('Done');
       }
     },
   });
 
-  // Announce the current segment whenever it changes (covers the first one too).
+  // Per-second chime in the last 5 seconds of each work segment — heads-up
+  // before the boundary so you can prep to release/switch.
   useEffect(() => {
-    if (!plan) return;
-    Speech.stop();
-    Speech.speak(timer.currentSegment.label);
-  }, [plan, timer.currentSegment.label]);
+    if (timer.status !== 'running') return;
+    if (timer.currentSegment.prep) return;
+    if (timer.remaining < 1 || timer.remaining > 5) return;
+    playChime();
+  }, [timer.remaining, timer.status, timer.currentSegment.prep]);
 
   // Credit stretched time toward the daily goal when leaving the run — once,
   // with the cumulative total, so finishing and bailing early are both captured.
@@ -98,13 +100,6 @@ export default function RunScreen() {
   useEffect(() => {
     return () => {
       recordStretchSeconds(elapsedRef.current);
-    };
-  }, []);
-
-  // Stop any speech when leaving the screen.
-  useEffect(() => {
-    return () => {
-      Speech.stop();
     };
   }, []);
 

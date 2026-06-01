@@ -32,6 +32,21 @@ export function withLeadIn(segments: Segment[], leadIn: Segment): Segment[] {
   return [leadIn, ...segments];
 }
 
+export function buildQuickSegments(seconds: number): Segment[] {
+  return [
+    { label: "Get ready", seconds: 3, prep: true },
+    { label: "", seconds },
+  ];
+}
+
+export function buildQuickPerSideSegments(secondsPerSide: number): Segment[] {
+  return [
+    { label: "Get ready", seconds: 3, prep: true },
+    { label: "", seconds: secondsPerSide },
+    { label: "", seconds: secondsPerSide },
+  ];
+}
+
 export function formatDuration(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;

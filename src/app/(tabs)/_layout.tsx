@@ -36,6 +36,15 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="quick"
+        options={{
+          title: 'Quick',
+          tabBarIcon: ({ color }) => (
+            <SymbolView name="bolt.fill" tintColor={color} size={26} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

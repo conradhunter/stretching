@@ -1,5 +1,12 @@
 import { describe, expect, it } from "bun:test";
-import { buildSegments, formatDuration, optionDuration, withLeadIn } from "./segments";
+import {
+  buildQuickPerSideSegments,
+  buildQuickSegments,
+  buildSegments,
+  formatDuration,
+  optionDuration,
+  withLeadIn,
+} from "./segments";
 
 const catCow = { id: "cat-cow", name: "Cat / Cow", image: "cat-cow", options: [] };
 const quad = { id: "quad", name: "Quad", image: "quad", options: [] };
@@ -43,6 +50,25 @@ describe("formatDuration", () => {
 
   it("renders mixed durations as minutes and seconds", () => {
     expect(formatDuration(90)).toBe("1 min 30 sec");
+  });
+});
+
+describe("buildQuickSegments", () => {
+  it("returns a 3s prep lead-in followed by the requested hold", () => {
+    expect(buildQuickSegments(60)).toEqual([
+      { label: "Get ready", seconds: 3, prep: true },
+      { label: "", seconds: 60 },
+    ]);
+  });
+});
+
+describe("buildQuickPerSideSegments", () => {
+  it("returns 3s prep then two hold segments of the requested length", () => {
+    expect(buildQuickPerSideSegments(30)).toEqual([
+      { label: "Get ready", seconds: 3, prep: true },
+      { label: "", seconds: 30 },
+      { label: "", seconds: 30 },
+    ]);
   });
 });
 

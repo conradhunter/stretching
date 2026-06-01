@@ -18,7 +18,12 @@ import { resolveItems } from '@/routines/resolve';
 import { getQuickItems } from '@/routines/quickRoutine';
 import { getRoutine } from '@/routines/store';
 import { stretches } from '@/stretches/library';
-import { buildSegments, withLeadIn } from '@/stretches/segments';
+import {
+  buildQuickPerSideSegments,
+  buildQuickSegments,
+  buildSegments,
+  withLeadIn,
+} from '@/stretches/segments';
 import { recordStretchSeconds } from '@/tracking/store';
 import { useTimer } from '@/timer/useTimer';
 
@@ -35,15 +40,31 @@ export default function RunScreen() {
   // fullScreenModal: the SafeAreaView component reads 0 top inset here, so pull
   // the raw insets and pad the chrome ourselves (close button clears the clock).
   const insets = useSafeAreaInsets();
-  const { id, option, routine: routineId, quick } = useLocalSearchParams<{
+  const { id, option, routine: routineId, quick, seconds, perSide } = useLocalSearchParams<{
     id?: string;
     option?: string;
     routine?: string;
     quick?: string;
+    seconds?: string;
+    perSide?: string;
   }>();
+  const isQuick = seconds !== undefined || perSide !== undefined;
 
-  // Resolve a single stretch+option, a saved routine, or the queue into one plan.
+  // Resolve a single stretch+option, a saved routine, the queue, or a bare
+  // duration ("Quick") into one plan.
   const plan = useMemo(() => {
+    if (perSide !== undefined) {
+      const n = Number(perSide);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      return { title: 'Quick', segments: buildQuickPerSideSegments(n), fallbackImage: undefined };
+    }
+
+    if (seconds !== undefined) {
+      const n = Number(seconds);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      return { title: 'Quick', segments: buildQuickSegments(n), fallbackImage: undefined };
+    }
+
     if (quick) {
       const items = resolveItems(getQuickItems());
       if (items.length === 0) return null;
@@ -68,7 +89,7 @@ export default function RunScreen() {
       prep: true,
     });
     return { title: stretch.name, segments, fallbackImage: stretch.image };
-  }, [id, option, routineId, quick]);
+  }, [id, option, routineId, quick, seconds, perSide]);
 
   // useTimer must run unconditionally; feed a harmless placeholder when invalid.
   const segments = plan?.segments ?? [{ label: '—', seconds: 1, prep: true }];
@@ -138,14 +159,18 @@ export default function RunScreen() {
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.topBarSide}>
             <SymbolView name="xmark" tintColor={theme.textSecondary} size={22} />
           </Pressable>
-          <ThemedText type="default" style={styles.position}>
-            {position} of {workTotal}
-          </ThemedText>
+          {isQuick ? (
+            <View />
+          ) : (
+            <ThemedText type="default" style={styles.position}>
+              {position} of {workTotal}
+            </ThemedText>
+          )}
           <View style={styles.topBarSide} />
         </View>
 
         <View style={styles.content}>
-          {photo && (
+          {!isQuick && photo && (
             <View style={styles.photoBlock}>
               <View style={[styles.track, { backgroundColor: theme.border }]}>
                 <View
@@ -159,9 +184,11 @@ export default function RunScreen() {
             </View>
           )}
 
-          <ThemedText type="subtitle" style={styles.segLabel}>
-            {done ? 'Done' : label}
-          </ThemedText>
+          {!isQuick && (
+            <ThemedText type="subtitle" style={styles.segLabel}>
+              {done ? 'Done' : label}
+            </ThemedText>
+          )}
           <ThemedText style={[styles.clock, { color: isPrep && !done ? theme.textSecondary : theme.text }]}>
             {clock(timer.remaining)}
           </ThemedText>
@@ -178,7 +205,7 @@ export default function RunScreen() {
             </Pressable>
           ) : (
             <View style={styles.controls}>
-              <ControlButton icon="backward.fill" onPress={timer.previous} />
+              {!isQuick && <ControlButton icon="backward.fill" onPress={timer.previous} />}
               <ControlButton
                 icon={paused ? 'play.fill' : 'pause.fill'}
                 onPress={paused ? timer.resume : timer.pause}

@@ -1,7 +1,8 @@
 // Lazy + guarded: the native ExpoAudio module only exists in dev-client /
-// standalone builds that were rebuilt after expo-audio was added. If it's not
-// present (old dev client), we no-op so the app stays usable and quiet.
-// Drop the real chime into assets/sounds/chime.mp3 to replace the silent placeholder.
+// standalone builds rebuilt after expo-audio was added. We probe with
+// requireOptionalNativeModule (returns null instead of throwing/red-boxing) so
+// an old dev client just stays silent instead of crashing.
+// Drop the real chime into assets/sounds/chime.mp3 to replace the placeholder.
 type Player = { seekTo: (s: number) => unknown; play: () => unknown };
 
 let player: Player | null = null;
@@ -11,10 +12,9 @@ function getPlayer(): Player | null {
   if (tried) return player;
   tried = true;
   try {
-    // Probe before importing expo-audio so its top-level `requireNativeModule`
-    // doesn't log a red-box error when the native side is missing.
-    const { NativeModules } = require('react-native') as typeof import('react-native');
-    if (!NativeModules.ExpoAudio) {
+    const { requireOptionalNativeModule } =
+      require('expo-modules-core') as typeof import('expo-modules-core');
+    if (!requireOptionalNativeModule('ExpoAudio')) {
       console.warn('[chime] ExpoAudio native module missing — rebuild the dev client');
       return (player = null);
     }

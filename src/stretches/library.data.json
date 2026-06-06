@@ -1,29 +1,5 @@
 [
   {
-    "id": "90-90-hamstring",
-    "name": "90/90 Hamstring",
-    "image": "90-90-hamstring",
-    "instructions": [
-      "Lie on your back, with one leg extended straight out.",
-      "With the other leg, bend the hip and knee to 90 degrees. You may brace your leg with your hands if necessary. This will be your starting position.",
-      "Extend your leg straight into the air, pausing briefly at the top. Return the leg to the starting position.",
-      "Repeat for 10-20 repetitions, and then switch to the other leg."
-    ],
-    "muscles": [
-      "hamstrings"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
     "id": "adductor",
     "name": "Adductor",
     "image": "adductor",
@@ -43,30 +19,6 @@
       {
         "kind": "perSide",
         "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "adductor-groin",
-    "name": "Adductor/Groin",
-    "image": "adductor-groin",
-    "instructions": [
-      "Lie on your back with your feet raised towards the ceiling.",
-      "Have your partner hold your feet or ankles. Abduct your legs as far as you can. This will be your starting position.",
-      "Attempt to squeeze your legs together for 10 or more seconds, while your partner prevents you from doing so.",
-      "Now, relax the muscles in your legs as your partner pushes your feet apart, stretching as far as is comfortable for you. Be sure to let your partner know when the stretch is adequate to prevent overstretching or injury."
-    ],
-    "muscles": [
-      "adductors"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
       }
     ]
   },
@@ -140,28 +92,6 @@
     ]
   },
   {
-    "id": "anterior-tibialis-smr",
-    "name": "Anterior Tibialis-SMR",
-    "image": "anterior-tibialis-smr",
-    "instructions": [
-      "Begin seated on the ground with your legs bent and your feet on the floor.",
-      "Using a Muscle Roller or a rolling pin, apply pressure to the muscles on the outside of your shins. Work from just below the knee to above the ankle, pausing at points of tension for 10-30 seconds. Repeat on the other leg."
-    ],
-    "muscles": [
-      "calves"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
     "id": "arm-circles",
     "name": "Arm Circles",
     "image": "arm-circles",
@@ -181,52 +111,6 @@
       {
         "kind": "hold",
         "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "behind-head-chest-stretch",
-    "name": "Behind Head Chest Stretch",
-    "image": "behind-head-chest-stretch",
-    "instructions": [
-      "Sit upright on the floor with your partner behind you.",
-      "Place your hands behind your hand, and push your elbows back as far as you can. Your partner should hold your elbows. This will be your starting position.",
-      "Gently attempt to pull your elbows forward with your hands still behind your head for 10 or more seconds. Your partner should prevent your elbows from moving.",
-      "Now, relax your muscles and have your partner gently pull the elbows back as far as it comfortable for you. Be sure to let your partner know when the stretch is adequate to prevent overstretching or injury."
-    ],
-    "muscles": [
-      "chest"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "brachialis-smr",
-    "name": "Brachialis-SMR",
-    "image": "brachialis-smr",
-    "instructions": [
-      "Lie on your side, with your upper arm against the foam roller. The upper arm should be more or less aligned with your body, with the outside of the bicep pressed against the foam roller.",
-      "Raise your hips off of the floor, supporting your weight on your arm and on your feet. Hold for 10-30 seconds, and then switch sides."
-    ],
-    "muscles": [
-      "biceps"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
       }
     ]
   },
@@ -261,28 +145,6 @@
       "Stand facing a wall from several feet away. Stagger your stance, placing one foot forward.",
       "Lean forward and rest your hands on the wall, keeping your heel, hip and head in a straight line.",
       "Attempt to keep your heel on the ground. Hold for 10-20 seconds and then switch sides."
-    ],
-    "muscles": [
-      "calves"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "calves-smr",
-    "name": "Calves-SMR",
-    "image": "calves-smr",
-    "instructions": [
-      "Begin seated on the floor. Place a foam roller underneath your lower leg. Your other leg can either be crossed over the opposite or be placed on the floor, supporting some of your weight. This will be your starting position.",
-      "Place your hands to your side or just behind you, and press down to raise your hips off of the floor, placing much of your weight against your calf muscle. Roll from below the knee to above the ankle, pausing at points of tension for 10-30 seconds. Repeat for the other leg."
     ],
     "muscles": [
       "calves"
@@ -619,28 +481,6 @@
     ]
   },
   {
-    "id": "foot-smr",
-    "name": "Foot-SMR",
-    "image": "foot-smr",
-    "instructions": [
-      "This exercise stretches the fascia of the muscles in the feet. Start off seated with your shoes removed. Using a foot roller or a similar object, such as a small section of pvc pipe, place your foot against the roller across the arch of your foot. This will be your starting position.",
-      "Press down firmly, rolling across the arch of your foot. Hold for 10-30 seconds, and then switch feet."
-    ],
-    "muscles": [
-      "calves"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
     "id": "frog-hops",
     "name": "Frog Hops",
     "image": "frog-hops",
@@ -685,52 +525,6 @@
     ]
   },
   {
-    "id": "groin-and-back-stretch",
-    "name": "Groin and Back Stretch",
-    "image": "groin-and-back-stretch",
-    "instructions": [
-      "Sit on the floor with your knees bent and feet together.",
-      "Interlock your fingers behind your head. This will be your starting position.",
-      "Curl downwards, bringing your elbows to the inside of your thighs. After a brief pause, return to the starting position with your head up and your back straight. Repeat for 10-20 repetitions."
-    ],
-    "muscles": [
-      "adductors"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "groiners",
-    "name": "Groiners",
-    "image": "groiners",
-    "instructions": [
-      "Begin in a pushup position on the floor. This will be your starting position.",
-      "Using both legs, jump forward landing with your feet next to your hands. Keep your head up as you do so.",
-      "Return to the starting position and immediately repeat the movement, continuing for 10-20 repetitions."
-    ],
-    "muscles": [
-      "adductors"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
     "id": "hamstring-stretch",
     "name": "Hamstring Stretch",
     "image": "hamstring-stretch",
@@ -741,52 +535,6 @@
     ],
     "muscles": [
       "hamstrings"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "hamstring-smr",
-    "name": "Hamstring-SMR",
-    "image": "hamstring-smr",
-    "instructions": [
-      "In a seated position, extend your legs over a foam roll so that it is position on the back of the upper legs. Place your hands to the side or behind you to help support your weight. This will be your starting position.",
-      "Using your hands, lift your hips off of the floor and shift your weight on the foam roll to one leg. Relax the hamstrings of the leg you are stretching.",
-      "Roll over the foam from below the hip to above the back of the knee, pausing at points of tension for 10-30 seconds. Repeat for the other leg."
-    ],
-    "muscles": [
-      "hamstrings"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "hip-circles-prone",
-    "name": "Hip Circles (prone)",
-    "image": "hip-circles-prone",
-    "instructions": [
-      "Position yourself on your hands and knees on the ground. Maintaining good posture, raise one bent knee off of the ground. This will be your starting position.",
-      "Keeping the knee in a bent position, rotate the femur in an arc, attempting to make a big circle with your knee.",
-      "Perform this slowly for a number of repetitions, and repeat on the other side."
-    ],
-    "muscles": [
-      "abductors"
     ],
     "options": [
       {
@@ -842,29 +590,6 @@
       {
         "kind": "hold",
         "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "iliotibial-tract-smr",
-    "name": "Iliotibial Tract-SMR",
-    "image": "iliotibial-tract-smr",
-    "instructions": [
-      "Lay on your side, with the bottom leg placed onto a foam roller between the hip and the knee. The other leg can be crossed in front of you.",
-      "Place as much of your weight as is tolerable onto your bottom leg; there is no need to keep your bottom leg in contact with the ground. Be sure to relax the muscles of the leg you are stretching.",
-      "Roll your leg over the foam from you hip to your knee, pausing for 10-30 seconds at points of tension. Repeat with the opposite leg."
-    ],
-    "muscles": [
-      "abductors"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
       }
     ]
   },
@@ -938,29 +663,6 @@
     ]
   },
   {
-    "id": "iron-crosses-stretch",
-    "name": "Iron Crosses (stretch)",
-    "image": "iron-crosses-stretch",
-    "instructions": [
-      "Lie face down on the floor, with your arms extended out to your side, palms pressed to the floor. This will be your starting position.",
-      "To begin, flex one knee and bring that leg across the back of your body, attempting to touch it to the ground near the opposite hand.",
-      "Promptly return the leg to the starting postion, and quickly repeat with the other leg. Continue alternating for 10-20 repetitions."
-    ],
-    "muscles": [
-      "quadriceps"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
     "id": "it-band-and-glute-stretch",
     "name": "IT Band and Glute Stretch",
     "image": "it-band-and-glute-stretch",
@@ -1005,29 +707,6 @@
     ]
   },
   {
-    "id": "knee-circles",
-    "name": "Knee Circles",
-    "image": "knee-circles",
-    "instructions": [
-      "Stand with your legs together and hands by your waist.",
-      "Now move your knees in a circular motion as you breathe normally.",
-      "Repeat for the recommended amount of repetitions."
-    ],
-    "muscles": [
-      "calves"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
     "id": "kneeling-forearm-stretch",
     "name": "Kneeling Forearm Stretch",
     "image": "kneeling-forearm-stretch",
@@ -1059,28 +738,6 @@
     ],
     "muscles": [
       "quadriceps"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "latissimus-dorsi-smr",
-    "name": "Latissimus Dorsi-SMR",
-    "image": "latissimus-dorsi-smr",
-    "instructions": [
-      "While lying on the floor, place a foam roll under your back and to one side, just behind your arm pit. This will be your starting position.",
-      "Keep the arm of the side being stretched behind and to the side of you as you shift your weight onto your lats, keeping your upper body off of the ground. Hold for 10-30 seconds, and switch sides."
-    ],
-    "muscles": [
-      "lats"
     ],
     "options": [
       {
@@ -1139,168 +796,6 @@
     ]
   },
   {
-    "id": "lower-back-curl",
-    "name": "Lower Back Curl",
-    "image": "lower-back-curl",
-    "instructions": [
-      "Lie on your stomach with your arms out to your sides. This will be your starting position.",
-      "Using your lower back muscles, extend your spine lifting your chest off of the ground. Do not use your arms to push yourself up. Keep your head up during the movement. Repeat for 10-20 repetitions."
-    ],
-    "muscles": [
-      "abdominals"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "lower-back-smr",
-    "name": "Lower Back-SMR",
-    "image": "lower-back-smr",
-    "instructions": [
-      "In a seated position, place a foam roll under your lower back. Cross your arms in front of you and protract your shoulders. This will be your starting position.",
-      "Raise your hips off of the floor and lean back, keeping your weight on your lower back. Now shift your weight slightly to one side, keeping your weight off of the spine and on the muscles to the side of it. Roll over your lower back, holding points of tension for 10-30 seconds. Repeat on the other side."
-    ],
-    "muscles": [
-      "lower back"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "lying-bent-leg-groin",
-    "name": "Lying Bent Leg Groin",
-    "image": "lying-bent-leg-groin",
-    "instructions": [
-      "Lie on your back with your knees bent and the soles of the feet pressed together. Have your partner hold your knees. This will be your starting position.",
-      "Attempt to squeeze your knees together, while your partner prevents any movement from occurring.",
-      "After 10-20 seconds, relax your muscles as your partner gently pushes your knees towards the floor. Be sure to inform your helper when the stretch is adequate to prevent injury or overstretching."
-    ],
-    "muscles": [
-      "adductors"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "lying-crossover",
-    "name": "Lying Crossover",
-    "image": "lying-crossover",
-    "instructions": [
-      "Lie on your back with your legs extended.",
-      "Cross one leg over your body with the knee bent, attempting to touch the knee to the ground. Your partner should kneel beside you, holding your shoulder down with one hand and controlling the crossed leg with the other. this will be your starting position.",
-      "Attempt to raise the bent knee off of the ground as your partner prevents any actual movement.",
-      "After 10-20 seconds, relax the leg as your partner gently presses the knee towards the floor. Repeat with the other side."
-    ],
-    "muscles": [
-      "abductors"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "lying-glute",
-    "name": "Lying Glute",
-    "image": "lying-glute",
-    "instructions": [
-      "Lie on your back with your partner kneeling beside you.",
-      "Flex the hip of one leg, raising it off of the floor. Rotate the leg so the foot is over the opposite hip, the lower leg perpendicular to your body. Your partner should hold the knee and ankle in place. This will be your starting position.",
-      "Attempt to push your leg towards your partner, who should be preventing any actual movement of the leg.",
-      "After 10-20 seconds, completely relax as your partner gently pushes the ankle and knee towards your chest. Be sure to inform your helper when the stretch is adequate to prevent injury or overstretching."
-    ],
-    "muscles": [
-      "glutes"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "lying-hamstring",
-    "name": "Lying Hamstring",
-    "image": "lying-hamstring",
-    "instructions": [
-      "Lie on your back with your legs extended. Your partner should be kneeling beside you. Raise one leg up towards the ceiling and have your partner hold the ankle. Your partner can use their shoulder to brace your leg if necessary. This will be your starting position.",
-      "With your partner holding your leg in place, attempt to flex the knee, contracting the hamstrings for 10-20 seconds.",
-      "Then relax your leg, allowing your partner to gently push the leg towards your head. Be sure to inform your helper when the stretch is adequate to prevent injury or overstretching. Switch sides once complete."
-    ],
-    "muscles": [
-      "hamstrings"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "lying-prone-quadriceps",
-    "name": "Lying Prone Quadriceps",
-    "image": "lying-prone-quadriceps",
-    "instructions": [
-      "Lay face down on the floor with your partner kneeling beside you. Flex one knee and raise that leg off the ground, attempting to touch your glutes with your foot. Your partner should hold the knee and ankle. This will be your starting position.",
-      "Attempt to extend your knee while your partner prevents any actual movement.",
-      "After 10-20 seconds, relax your muscles as your partner gently pushes the foot towards your glutes, further stretching the quadriceps and hip flexors.",
-      "After 10-20 seconds, switch sides."
-    ],
-    "muscles": [
-      "quadriceps"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
     "id": "middle-back-stretch",
     "name": "Middle Back Stretch",
     "image": "middle-back-stretch",
@@ -1319,28 +814,6 @@
       {
         "kind": "perSide",
         "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "neck-smr",
-    "name": "Neck-SMR",
-    "image": "neck-smr",
-    "instructions": [
-      "Using a muscle roller or a rolling pin, place the roller behind your head and against your neck. Make sure that you do not place the roller directly against the spine, but turned slightly so that the roller is pressed against the muscles to either side of the spine. This will be your starting position.",
-      "Starting at the top of your neck, slowly roll down the muscles of your neck, pausing at points of tension for 10-30 seconds."
-    ],
-    "muscles": [
-      "neck"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
       }
     ]
   },
@@ -1482,29 +955,6 @@
     ]
   },
   {
-    "id": "overhead-lat",
-    "name": "Overhead Lat",
-    "image": "overhead-lat",
-    "instructions": [
-      "Sit upright on the floor with your partner behind you. Raise one arm straight up, and flex the elbow, attempting to touch your hand to your back. Your parner should hold your tricep and wrist. This will be your starting position.",
-      "Attempt to pull your upper arm to your side as your partner prevents you from doing actually doing so.",
-      "After 10-20 seconds, relax the arm and allow your partner to further stretch the lat by applying gentle pressure to the tricep. Hold for 10-20 seconds, and then switch sides."
-    ],
-    "muscles": [
-      "lats"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
     "id": "overhead-stretch",
     "name": "Overhead Stretch",
     "image": "overhead-stretch",
@@ -1523,29 +973,6 @@
       {
         "kind": "hold",
         "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "overhead-triceps",
-    "name": "Overhead Triceps",
-    "image": "overhead-triceps",
-    "instructions": [
-      "Sit upright on the floor with your partner behind you. Raise one arm straight up, and flex the elbow, attempting to touch your hand to your back. Your parner should hold your elbow and wrist. This will be your starting position.",
-      "Attempt to extend the arm straight into the air as your partner prevents you from doing actually doing so.",
-      "After 10-20 seconds, relax the arm and allow your partner to further stretch the tricep by applying gentle pressure to the wrist. Hold for 10-20 seconds, and then switch sides."
-    ],
-    "muscles": [
-      "triceps"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
       }
     ]
   },
@@ -1582,50 +1009,6 @@
     ],
     "muscles": [
       "calves"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "peroneals-smr",
-    "name": "Peroneals-SMR",
-    "image": "peroneals-smr",
-    "instructions": [
-      "Lay on your side, supporting your weight on your forearm and on a foam roller placed on the outside of your lower leg. Your upper leg can either be on top of your lower leg, or you can cross it in front of you. This will be your starting position.",
-      "Raise your hips off of the ground and begin to roll from below the knee to above the ankle on the side of your leg, pausing at points of tension for 10-30 seconds. Repeat on the other leg."
-    ],
-    "muscles": [
-      "calves"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "piriformis-smr",
-    "name": "Piriformis-SMR",
-    "image": "piriformis-smr",
-    "instructions": [
-      "Sit with your buttocks on top of a foam roll. Bend your knees, and then cross one leg so that the ankle is over the knee. This will be your starting position.",
-      "Shift your weight to the side of the crossed leg, rolling over the buttocks until you feel tension in your upper glute. You may assist the stretch by using one hand to pull the bent knee towards your chest. Hold this position for 10-30 seconds, and then switch sides."
-    ],
-    "muscles": [
-      "glutes"
     ],
     "options": [
       {
@@ -1705,72 +1088,6 @@
     ]
   },
   {
-    "id": "quadriceps-smr",
-    "name": "Quadriceps-SMR",
-    "image": "quadriceps-smr",
-    "instructions": [
-      "Lay facedown on the floor with your weight supported by your hands or forearms. Place a foam roll underneath one leg on the quadriceps, and keep the foot off of the ground. Make sure to relax the leg as much as possible. This will be your starting position.",
-      "Shifting as much weight onto the leg to be stretched as is tolerable, roll over the foam from above the knee to below the hip, holding points of tension for 10-30 seconds. Switch sides."
-    ],
-    "muscles": [
-      "quadriceps"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "rear-leg-raises",
-    "name": "Rear Leg Raises",
-    "image": "rear-leg-raises",
-    "instructions": [
-      "Place yourself on your hands knees on an exercise mat. Your head should be looking forward and the bend of the knees should create a 90-degree angle between the hamstrings and the calves. This will be your starting position.",
-      "Extend one leg up and behind you. The knee and hip should both extend. Repeat for 5-10 repetitions, and then switch sides."
-    ],
-    "muscles": [
-      "quadriceps"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "rhomboids-smr",
-    "name": "Rhomboids-SMR",
-    "image": "rhomboids-smr",
-    "instructions": [
-      "Lay down with your back on the floor. Place a foam roll underneath your upper back, and cross your arms in front of you, protracting your shoulders. This will be your starting position.",
-      "Raise your hips off of the ground, placing your weight onto the foam roll. Shift your weight to one side at a time, rolling over your middle and upper back. Pause at points of tension for 10-30 seconds."
-    ],
-    "muscles": [
-      "middle back"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
     "id": "round-the-world-shoulder-stretch",
     "name": "Round The World Shoulder Stretch",
     "image": "round-the-world-shoulder-stretch",
@@ -1817,54 +1134,6 @@
     ]
   },
   {
-    "id": "scissor-kick",
-    "name": "Scissor Kick",
-    "image": "scissor-kick",
-    "instructions": [
-      "To begin, lie down with your back pressed against the floor or on an exercise mat (optional). Your arms should be fully extended to the sides with your palms facing down. Note: The arms should be stationary the entire time.",
-      "With a slight bend at the knees, lift your legs up so that your heels are about 6 inches off the ground. This is the starting position.",
-      "Now lift your left leg up to about a 45 degree angle while your right leg is lowered until the heel is about 2-3 inches from the ground.",
-      "Switch movements by raising your right leg up and lowering your left leg. Remember to breathe while performing this exercise.",
-      "Repeat for the recommended amount of repetitions."
-    ],
-    "muscles": [
-      "abdominals"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "seated-biceps",
-    "name": "Seated Biceps",
-    "image": "seated-biceps",
-    "instructions": [
-      "Sit on the floor with your knees bent and your partner standing behind you. Extend your arms straight behind you with your palms facing each other. Your partner will hold your wrists for you. This will be the starting position.",
-      "Attempt to flex your elbows, while your partner prevents any actual movement.",
-      "After 10-20 seconds, relax your arms while your partner gently pulls your wrists up to stretch your biceps. Be sure to let your partner know when the stretch is appropriate to prevent injury or overstretching."
-    ],
-    "muscles": [
-      "biceps"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
     "id": "seated-calf-stretch",
     "name": "Seated Calf Stretch",
     "image": "seated-calf-stretch",
@@ -1907,75 +1176,6 @@
       {
         "kind": "perSide",
         "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "seated-front-deltoid",
-    "name": "Seated Front Deltoid",
-    "image": "seated-front-deltoid",
-    "instructions": [
-      "Sit upright on the floor with your legs bent, your partner standing behind you. Stick your arms straight out to your sides, with your palms facing the ground. Attempt to move them as far behind you as possible, as your assistant holds your wrists. This will be your starting position.",
-      "Keeping your elbows straight, attempt to move your arms to the front, with your partner gently restraining you to prevent any actual movement for 10-20 seconds.",
-      "Now, relax your muscles and allow your partner to gently increase the stretch on the shoulders and chest. Hold for 10 to 20 seconds."
-    ],
-    "muscles": [
-      "shoulders"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "seated-glute",
-    "name": "Seated Glute",
-    "image": "seated-glute",
-    "instructions": [
-      "In a seated position with your knees bent, cross one ankle over the opposite knee. Your partner will stand behind you. Now, lean forward as your partner braces your shoulders with their hands. This will be your starting position.",
-      "Attempt to push your torso back for 10-20 seconds, as your partner prevents any actual movement of your torso.",
-      "Now relax your muscles as your partner increases the stretch by gently pushing your torso forward for 10-20 seconds."
-    ],
-    "muscles": [
-      "glutes"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "seated-hamstring",
-    "name": "Seated Hamstring",
-    "image": "seated-hamstring",
-    "instructions": [
-      "In a seated position with your legs extended, have your partner stand behind you. Now, lean forward as your partner braces your shoulders with their hands. This will be your starting position.",
-      "Attempt to push your torso back for 10-20 seconds, as your partner prevents any actual movement of your torso.",
-      "Now relax your muscles as your partner increases the stretch by gently pushing your torso forward for 10-20 seconds."
-    ],
-    "muscles": [
-      "hamstrings"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
       }
     ]
   },
@@ -2202,29 +1402,6 @@
     ]
   },
   {
-    "id": "sit-squats",
-    "name": "Sit Squats",
-    "image": "sit-squats",
-    "instructions": [
-      "Stand with your feet shoulder width apart. This will be your starting position.",
-      "Begin the movement by flexing your knees and hips, sitting back with your hips.",
-      "Continue until you have squatted a portion of the way down, but are above parallel, and quickly reverse the motion until you return to the starting position. Repeat for 5-10 repetitions."
-    ],
-    "muscles": [
-      "quadriceps"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
     "id": "spinal-stretch",
     "name": "Spinal Stretch",
     "image": "spinal-stretch",
@@ -2349,30 +1526,6 @@
     ],
     "muscles": [
       "hamstrings"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "standing-hip-circles",
-    "name": "Standing Hip Circles",
-    "image": "standing-hip-circles",
-    "instructions": [
-      "Begin standing on one leg, holding to a vertical support.",
-      "Raise the unsupported knee to 90 degrees. This will be your starting position.",
-      "Open the hip as far as possible, attempting to make a big circle with your knee.",
-      "Perform this movement slowly for a number of repetitions, and repeat on the other side."
-    ],
-    "muscles": [
-      "abductors"
     ],
     "options": [
       {
@@ -2570,54 +1723,6 @@
     ]
   },
   {
-    "id": "toe-touchers",
-    "name": "Toe Touchers",
-    "image": "toe-touchers",
-    "instructions": [
-      "To begin, lie down on the floor or an exercise mat with your back pressed against the floor. Your arms should be lying across your sides with the palms facing down.",
-      "Your legs should be touching each other. Slowly elevate your legs up in the air until they are almost perpendicular to the floor with a slight bend at the knees. Your feet should be parallel to the floor.",
-      "Move your arms so that they are fully extended at a 45 degree angle from the floor. This is the starting position.",
-      "While keeping your lower back pressed against the floor, slowly lift your torso and use your hands to try and touch your toes. Remember to exhale while perform this part of the exercise.",
-      "Slowly begin to lower your torso and arms back down to the starting position while inhaling. Remember to keep your arms straight out pointing towards your toes.",
-      "Repeat for the recommended amount of repetitions."
-    ],
-    "muscles": [
-      "abdominals"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
-    "id": "torso-rotation",
-    "name": "Torso Rotation",
-    "image": "torso-rotation",
-    "instructions": [
-      "Stand upright holding an exercise ball with both hands. Extend your arms so the ball is straight out in front of you. This will be your starting position.",
-      "Rotate your torso to one side, keeping your eyes on the ball as you move. Now, rotate back to the opposite direction. Repeat for 10-20 repetitions."
-    ],
-    "muscles": [
-      "abdominals"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
-      }
-    ]
-  },
-  {
     "id": "tricep-side-stretch",
     "name": "Tricep Side Stretch",
     "image": "tricep-side-stretch",
@@ -2725,29 +1830,6 @@
     ]
   },
   {
-    "id": "windmills",
-    "name": "Windmills",
-    "image": "windmills",
-    "instructions": [
-      "Lie on your back with your arms extended out to the sides and your legs straight. This will be your starting position.",
-      "Lift one leg and quickly cross it over your body, attempting to touch the ground near the opposite hand.",
-      "Return to the starting position, and repeat with the opposite leg. Continue to alternate for 10-20 repetitions."
-    ],
-    "muscles": [
-      "abductors"
-    ],
-    "options": [
-      {
-        "kind": "perSide",
-        "secondsPerSide": 30
-      },
-      {
-        "kind": "perSide",
-        "secondsPerSide": 20
-      }
-    ]
-  },
-  {
     "id": "worlds-greatest-stretch",
     "name": "World's Greatest Stretch",
     "image": "worlds-greatest-stretch",
@@ -2767,29 +1849,6 @@
       {
         "kind": "perSide",
         "secondsPerSide": 20
-      }
-    ]
-  },
-  {
-    "id": "wrist-circles",
-    "name": "Wrist Circles",
-    "image": "wrist-circles",
-    "instructions": [
-      "Start by standing straight with your feet being shoulder width apart from each other. Elevate your arms to the side of you until they are fully extended and parallel to the floor at a height that is evenly aligned with your shoulders. Tip: Your torso and arms should form the letter \"T: Your palms should be facing down. This is the starting position.",
-      "Keeping your entire body stationary except for the wrists, begin to rotate both wrists forward in a circular motion. Tip: Pretend that you are trying to draw circles by using your hands as the brush. Breathe normally as you perform this exercise.",
-      "Repeat for the recommended amount of repetitions."
-    ],
-    "muscles": [
-      "forearms"
-    ],
-    "options": [
-      {
-        "kind": "hold",
-        "seconds": 45
-      },
-      {
-        "kind": "hold",
-        "seconds": 30
       }
     ]
   }

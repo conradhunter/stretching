@@ -51,7 +51,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "bun test src"
+    "test": "bun test src",
+    "build:preview": "bunx eas-cli@latest build --profile preview --platform ios"
   },
   "private": true
 }

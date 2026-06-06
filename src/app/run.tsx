@@ -17,7 +17,7 @@ import { buildRoutineSegments } from '@/routines/routines';
 import { resolveItems } from '@/routines/resolve';
 import { getQuickItems } from '@/routines/quickRoutine';
 import { getRoutine } from '@/routines/store';
-import { stretches } from '@/stretches/library';
+import { useAllStretches } from '@/stretches/customStore';
 import {
   buildQuickPerSideSegments,
   buildQuickSegments,
@@ -49,6 +49,8 @@ export default function RunScreen() {
     perSide?: string;
   }>();
   const isQuick = seconds !== undefined || perSide !== undefined;
+  // Subscribed (not a snapshot) so plans re-resolve once persisted customs load.
+  const stretches = useAllStretches();
 
   // Resolve a single stretch+option, a saved routine, the queue, or a bare
   // duration ("Quick") into one plan.
@@ -89,7 +91,7 @@ export default function RunScreen() {
       prep: true,
     });
     return { title: stretch.name, segments, fallbackImage: stretch.image };
-  }, [id, option, routineId, quick, seconds, perSide]);
+  }, [id, option, routineId, quick, seconds, perSide, stretches]);
 
   // useTimer must run unconditionally; feed a harmless placeholder when invalid.
   const segments = plan?.segments ?? [{ label: '—', seconds: 1, prep: true }];
@@ -170,7 +172,7 @@ export default function RunScreen() {
         </View>
 
         <View style={styles.content}>
-          {!isQuick && photo && (
+          {!isQuick && (
             <View style={styles.photoBlock}>
               <View style={[styles.track, { backgroundColor: theme.border }]}>
                 <View
@@ -180,7 +182,14 @@ export default function RunScreen() {
                   ]}
                 />
               </View>
-              <Image source={photo} style={styles.photo} contentFit="cover" />
+              {photo ? (
+                <Image source={photo} style={styles.photo} contentFit="cover" />
+              ) : (
+                <View
+                  style={[styles.photo, styles.photoPlaceholder, { backgroundColor: theme.backgroundSelected }]}>
+                  <SymbolView name="figure.flexibility" tintColor={theme.textSecondary} size={72} />
+                </View>
+              )}
             </View>
           )}
 
@@ -273,6 +282,7 @@ const styles = StyleSheet.create({
   track: { width: '100%', height: 4, borderRadius: Radius.full, overflow: 'hidden' },
   fill: { height: '100%', borderRadius: Radius.full },
   photo: { width: '100%', aspectRatio: 850 / 567, borderRadius: Radius.lg },
+  photoPlaceholder: { alignItems: 'center', justifyContent: 'center' },
   segLabel: { textAlign: 'center' },
   clock: { fontSize: 80, fontWeight: '700', fontVariant: ['tabular-nums'], lineHeight: 88, letterSpacing: -1 },
   footer: { paddingBottom: Spacing.four, alignItems: 'center' },

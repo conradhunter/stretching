@@ -15,8 +15,8 @@ import { ThemedView } from '@/components/themed-view';
 import { BorderWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { addToQuick, useQuickRoutine } from '@/routines/quickRoutine';
+import { useAllStretches } from '@/stretches/customStore';
 import { stretchImages } from '@/stretches/images';
-import { stretches } from '@/stretches/library';
 import { bumpMuscle, useMuscleCounts } from '@/stretches/muscleUsage';
 import {
   allMuscles,
@@ -36,6 +36,7 @@ export default function StretchesScreen() {
   const countsRef = useRef(counts);
   countsRef.current = counts;
   const quickCount = useQuickRoutine().length;
+  const stretches = useAllStretches();
 
   const quickAdd = (stretch: Stretch) => {
     addToQuick(stretch.id, 0);
@@ -58,13 +59,19 @@ export default function StretchesScreen() {
   useFocusEffect(
     useCallback(() => {
       setOrderedMuscles(orderByUsage(allMuscles(stretches), countsRef.current));
-    }, [])
+    }, [stretches])
   );
 
   const filtered = useMemo(
     () => filterStretches(stretches, query, expandMuscleSelection(selectedMuscles)),
-    [query, selectedMuscles]
+    [stretches, query, selectedMuscles]
   );
+
+  // Search escape hatch: offer to create the stretch you just failed to find.
+  const trimmedQuery = query.trim();
+  const showCreate =
+    trimmedQuery.length > 0 &&
+    !filtered.some((s) => s.name.toLowerCase() === trimmedQuery.toLowerCase());
 
   const toggleMuscle = (token: string) =>
     setSelectedMuscles((prev) => {
@@ -104,6 +111,12 @@ export default function StretchesScreen() {
           <ThemedText type="subtitle">Stretches</ThemedText>
           <View style={styles.headerRight}>
             <GoalRing />
+            <Pressable
+              onPress={() => router.push('/stretch/new')}
+              hitSlop={10}
+              style={({ pressed }) => pressed && styles.pressed}>
+              <SymbolView name="plus" tintColor={theme.text} size={24} />
+            </Pressable>
             <Pressable
               onPress={() => router.push('/quick-routine')}
               hitSlop={10}
@@ -164,6 +177,22 @@ export default function StretchesScreen() {
               No stretches match your filters.
             </ThemedText>
           }
+          ListFooterComponent={
+            showCreate ? (
+              <Pressable
+                onPress={() =>
+                  router.push({ pathname: '/stretch/new', params: { name: trimmedQuery } })
+                }
+                style={({ pressed }) => pressed && styles.pressed}>
+                <ThemedView type="backgroundElement" bordered style={[styles.row, styles.createRow]}>
+                  <SymbolView name="plus.circle" tintColor={theme.accent} size={24} />
+                  <ThemedText type="default" style={{ color: theme.accent }} numberOfLines={1}>
+                    Create “{trimmedQuery}”
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
+            ) : null
+          }
         />
       </SafeAreaView>
 
@@ -208,7 +237,9 @@ function StretchRow({
         {photo ? (
           <Image source={photo} style={styles.thumb} contentFit="cover" />
         ) : (
-          <View style={[styles.thumb, { backgroundColor: theme.backgroundSelected }]} />
+          <View style={[styles.thumb, styles.thumbPlaceholder, { backgroundColor: theme.backgroundSelected }]}>
+            <SymbolView name="figure.flexibility" tintColor={theme.textSecondary} size={28} />
+          </View>
         )}
       </Pressable>
       <Pressable onPress={onPress} style={({ pressed }) => [styles.rowMain, pressed && styles.pressed]}>
@@ -287,6 +318,8 @@ const styles = StyleSheet.create({
   rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   addBtn: { padding: Spacing.one },
   thumb: { width: 60, height: 60, borderRadius: Radius.md },
+  thumbPlaceholder: { alignItems: 'center', justifyContent: 'center' },
+  createRow: { justifyContent: 'center', paddingVertical: Spacing.three, marginTop: Spacing.two },
   rowText: { flex: 1, gap: Spacing.half },
   pressed: { opacity: 0.6 },
   empty: { textAlign: 'center', paddingTop: Spacing.five },

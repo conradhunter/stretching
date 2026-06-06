@@ -9,12 +9,13 @@ import { useTheme } from '@/hooks/use-theme';
 import { moveItem, removeItem } from '@/routines/routines';
 import { itemsDuration } from '@/routines/resolve';
 import { deleteRoutine, updateRoutine, useRoutines } from '@/routines/store';
-import { stretches } from '@/stretches/library';
+import { useAllStretches } from '@/stretches/customStore';
 import { formatDuration, optionDuration } from '@/stretches/segments';
 
 export default function RoutineBuilderScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
+  const stretches = useAllStretches();
   const router = useRouter();
   const routine = useRoutines().find((r) => r.id === id);
 

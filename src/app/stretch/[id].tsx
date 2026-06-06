@@ -13,8 +13,9 @@ import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { addToQuick } from '@/routines/quickRoutine';
+import { isCustomStretch } from '@/stretches/custom';
+import { useAllStretches } from '@/stretches/customStore';
 import { stretchImages } from '@/stretches/images';
-import { stretches } from '@/stretches/library';
 import { formatDuration, optionDuration, type TimeOption } from '@/stretches/segments';
 
 function describeOption(option: TimeOption): { title: string; subtitle?: string } {
@@ -27,7 +28,7 @@ export default function StretchDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
   const router = useRouter();
-  const stretch = stretches.find((s) => s.id === id);
+  const stretch = useAllStretches().find((s) => s.id === id);
 
   const photoRefs = useRef<(View | null)[]>([]);
   const [lightbox, setLightbox] = useState<{ index: number; frames: Rect[] } | null>(null);
@@ -56,15 +57,27 @@ export default function StretchDetailScreen() {
         options={{
           title: stretch.name,
           headerRight: () => (
-            <Pressable
-              onPress={() => {
-                addToQuick(stretch.id, 0);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
-              hitSlop={10}
-              style={({ pressed }) => pressed && styles.pressed}>
-              <SymbolView name="plus.circle.fill" tintColor={theme.accent} size={26} />
-            </Pressable>
+            <View style={styles.headerActions}>
+              {isCustomStretch(stretch.id) && (
+                <Pressable
+                  onPress={() =>
+                    router.push({ pathname: '/stretch/new', params: { edit: stretch.id } })
+                  }
+                  hitSlop={10}
+                  style={({ pressed }) => pressed && styles.pressed}>
+                  <SymbolView name="pencil.circle" tintColor={theme.text} size={26} />
+                </Pressable>
+              )}
+              <Pressable
+                onPress={() => {
+                  addToQuick(stretch.id, 0);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+                hitSlop={10}
+                style={({ pressed }) => pressed && styles.pressed}>
+                <SymbolView name="plus.circle.fill" tintColor={theme.accent} size={26} />
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -178,6 +191,7 @@ const styles = StyleSheet.create({
     gap: Spacing.half,
   },
   pressed: { opacity: 0.6 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   steps: { gap: Spacing.two },
   step: { flexDirection: 'row', gap: Spacing.two },
   stepNum: { width: 18, textAlign: 'right' },

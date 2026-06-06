@@ -10,12 +10,13 @@ import { useTheme } from '@/hooks/use-theme';
 import { addItem } from '@/routines/routines';
 import { updateRoutine } from '@/routines/store';
 import { stretchImages } from '@/stretches/images';
-import { stretches } from '@/stretches/library';
+import { useAllStretches } from '@/stretches/customStore';
 import { formatDuration, optionDuration } from '@/stretches/segments';
 
 export default function AddStretchScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
+  const stretches = useAllStretches();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -26,7 +27,7 @@ export default function AddStretchScreen() {
     return stretches.filter(
       (s) => s.name.toLowerCase().includes(q) || s.muscles.some((m) => m.toLowerCase().includes(q))
     );
-  }, [query]);
+  }, [stretches, query]);
 
   const add = (stretchId: string, optionIndex: number) => {
     updateRoutine(id, (r) => addItem(r, { stretchId, optionIndex }));

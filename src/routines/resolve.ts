@@ -1,8 +1,9 @@
-import { stretches } from "../stretches/library";
+import { getAllStretches } from "../stretches/customStore";
 import { type ResolvedItem, type RoutineItem, routineDuration } from "./routines";
 
-/** Looks raw routine items up against the library, dropping any that no longer resolve. */
+/** Looks raw routine items up against the library + customs, dropping any that no longer resolve. */
 export function resolveItems(raw: RoutineItem[]): ResolvedItem[] {
+  const stretches = getAllStretches();
   return raw
     .map((it): ResolvedItem | null => {
       const stretch = stretches.find((s) => s.id === it.stretchId);

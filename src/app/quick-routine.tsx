@@ -16,11 +16,12 @@ import {
 } from '@/routines/quickRoutine';
 import { itemsDuration } from '@/routines/resolve';
 import { createRoutine, updateRoutine } from '@/routines/store';
-import { stretches } from '@/stretches/library';
+import { useAllStretches } from '@/stretches/customStore';
 import { formatDuration, optionDuration } from '@/stretches/segments';
 
 export default function QuickRoutineScreen() {
   const theme = useTheme();
+  const stretches = useAllStretches();
   const router = useRouter();
   const items = useQuickRoutine();
 

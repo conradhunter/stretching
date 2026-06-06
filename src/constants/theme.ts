@@ -19,6 +19,7 @@ export const Colors = {
     border: '#e4e4e7', // zinc-200
     accent: '#2563eb', // blue-600
     accentForeground: '#ffffff',
+    destructive: '#dc2626', // red-600
   },
   dark: {
     text: '#fafafa', // zinc-50
@@ -29,6 +30,7 @@ export const Colors = {
     border: '#27272a', // zinc-800
     accent: '#3b82f6', // blue-500 (brighter for dark surfaces)
     accentForeground: '#ffffff',
+    destructive: '#ef4444', // red-500 (brighter for dark surfaces)
   },
 } as const;
 

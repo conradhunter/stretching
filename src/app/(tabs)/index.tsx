@@ -3,13 +3,13 @@ import { Image } from 'expo-image';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { GoalRing } from '@/components/goal-ring';
 import type { Rect } from '@/components/lightbox/geometry';
 import { ImageLightbox } from '@/components/lightbox/image-lightbox';
 import { measureFrame } from '@/components/lightbox/measure';
-import { ProgressRing } from '@/components/progress-ring';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BorderWidth, Radius, Spacing } from '@/constants/theme';
@@ -28,10 +28,6 @@ import {
   orderByUsage,
 } from '@/stretches/muscles';
 import type { Stretch } from '@/stretches/segments';
-import { currentStreak, todayProgress } from '@/tracking/streaks';
-import { setGoalMinutes, todayLocalDate, useTracking } from '@/tracking/store';
-
-const GOAL_PRESETS = [5, 10, 15, 20, 30, 45, 60];
 
 export default function StretchesScreen() {
   const theme = useTheme();
@@ -40,12 +36,6 @@ export default function StretchesScreen() {
   const countsRef = useRef(counts);
   countsRef.current = counts;
   const quickCount = useQuickRoutine().length;
-
-  const tracking = useTracking();
-  const today = todayLocalDate();
-  const progress = todayProgress(tracking.log, today, tracking.goalSeconds);
-  const streak = currentStreak(tracking.log, today);
-  const [goalSheetOpen, setGoalSheetOpen] = useState(false);
 
   const quickAdd = (stretch: Stretch) => {
     addToQuick(stretch.id, 0);
@@ -113,24 +103,7 @@ export default function StretchesScreen() {
         <View style={styles.headerRow}>
           <ThemedText type="subtitle">Stretches</ThemedText>
           <View style={styles.headerRight}>
-            <Pressable
-              onPress={() => setGoalSheetOpen(true)}
-              hitSlop={8}
-              style={({ pressed }) => pressed && styles.pressed}>
-              <ProgressRing
-                fraction={progress.fraction}
-                trackColor={theme.border}
-                fillColor={theme.accent}>
-                <View style={styles.ringCenter}>
-                  <SymbolView
-                    name="flame.fill"
-                    tintColor={progress.met ? theme.accent : theme.textSecondary}
-                    size={11}
-                  />
-                  <Text style={[styles.ringStreak, { color: theme.text }]}>{streak}</Text>
-                </View>
-              </ProgressRing>
-            </Pressable>
+            <GoalRing />
             <Pressable
               onPress={() => router.push('/quick-routine')}
               hitSlop={10}
@@ -202,55 +175,6 @@ export default function StretchesScreen() {
           onClose={() => setLightbox(null)}
         />
       )}
-
-      <Modal
-        visible={goalSheetOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setGoalSheetOpen(false)}>
-        <Pressable style={styles.sheetBackdrop} onPress={() => setGoalSheetOpen(false)}>
-          <Pressable onPress={() => {}} style={styles.sheetStop}>
-            <ThemedView type="backgroundElement" bordered style={styles.sheet}>
-              <ThemedText type="subtitle">Daily goal</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                Minutes of stretching per day
-              </ThemedText>
-              <View style={styles.goalGrid}>
-                {GOAL_PRESETS.map((min) => {
-                  const active = Math.round(tracking.goalSeconds / 60) === min;
-                  return (
-                    <Pressable
-                      key={min}
-                      onPress={() => {
-                        setGoalMinutes(min);
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setGoalSheetOpen(false);
-                      }}
-                      style={({ pressed }) => pressed && styles.pressed}>
-                      <ThemedView
-                        type="backgroundElement"
-                        style={[
-                          styles.goalChip,
-                          active
-                            ? { backgroundColor: theme.accent, borderColor: theme.accent }
-                            : { borderColor: theme.border },
-                        ]}>
-                        <Text
-                          style={[
-                            styles.goalChipText,
-                            { color: active ? theme.accentForeground : theme.text },
-                          ]}>
-                          {min}
-                        </Text>
-                      </ThemedView>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ThemedView>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </ThemedView>
   );
 }
@@ -367,24 +291,4 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.6 },
   empty: { textAlign: 'center', paddingTop: Spacing.five },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
-  ringCenter: { alignItems: 'center', justifyContent: 'center' },
-  ringStreak: { fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'], lineHeight: 16 },
-  sheetBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheetStop: { padding: Spacing.three, paddingBottom: Spacing.six },
-  sheet: { borderRadius: Radius.lg, padding: Spacing.four, gap: Spacing.two },
-  goalGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, marginTop: Spacing.two },
-  goalChip: {
-    minWidth: 52,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: Radius.md,
-    borderWidth: BorderWidth,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  goalChipText: { fontSize: 16, fontWeight: '600' },
 });

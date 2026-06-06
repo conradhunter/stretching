@@ -18,11 +18,12 @@ describe("buildSegments", () => {
     expect(segments).toEqual([{ label: "Cat / Cow", seconds: 30 }]);
   });
 
-  it("expands a perSide option into right then left segments", () => {
+  it("expands a perSide option into right then left segments with a switch buffer between", () => {
     const segments = buildSegments(quad, { kind: "perSide", secondsPerSide: 30 });
 
     expect(segments).toEqual([
       { label: "Quad — right side", seconds: 30 },
+      { label: "Switch sides", seconds: 5, prep: true },
       { label: "Quad — left side", seconds: 30 },
     ]);
   });
@@ -33,8 +34,8 @@ describe("optionDuration", () => {
     expect(optionDuration({ kind: "hold", seconds: 45 })).toBe(45);
   });
 
-  it("totals a perSide as both sides combined", () => {
-    expect(optionDuration({ kind: "perSide", secondsPerSide: 30 })).toBe(60);
+  it("totals a perSide as both sides plus the switch buffer", () => {
+    expect(optionDuration({ kind: "perSide", secondsPerSide: 30 })).toBe(65);
   });
 });
 
@@ -63,10 +64,11 @@ describe("buildQuickSegments", () => {
 });
 
 describe("buildQuickPerSideSegments", () => {
-  it("returns 3s prep then two hold segments of the requested length", () => {
+  it("returns 3s prep then two holds separated by a switch buffer", () => {
     expect(buildQuickPerSideSegments(30)).toEqual([
       { label: "Get ready", seconds: 3, prep: true },
       { label: "", seconds: 30 },
+      { label: "Switch sides", seconds: 5, prep: true },
       { label: "", seconds: 30 },
     ]);
   });

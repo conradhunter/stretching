@@ -20,6 +20,7 @@ describe("buildRoutineSegments", () => {
       { label: "Cat / Cow", seconds: 30, image: "cat-cow" },
       { label: "Next: Quad", seconds: 10, image: "quad", prep: true },
       { label: "Quad — right side", seconds: 30, image: "quad" },
+      { label: "Switch sides", seconds: 5, image: "quad", prep: true },
       { label: "Quad — left side", seconds: 30, image: "quad" },
     ]);
   });
@@ -37,8 +38,8 @@ describe("routineDuration", () => {
   ];
 
   it("sums prep + work for every item (matches the real run length)", () => {
-    // (10 prep + 30 hold) + (10 prep + 2×30 per side) = 40 + 70
-    expect(routineDuration(items)).toBe(110);
+    // (10 prep + 30 hold) + (10 prep + 30 + 5 switch + 30) = 40 + 75
+    expect(routineDuration(items)).toBe(115);
   });
 
   it("honors a custom prep length and returns 0 for no items", () => {

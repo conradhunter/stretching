@@ -184,7 +184,9 @@ export default function RunScreen() {
             </View>
           )}
 
-          {!isQuick && (
+          {/* Quick runs have no stretch name, but still surface the prep beats
+              ("Get ready" / "Switch sides") so the buffer reads as intentional. */}
+          {(!isQuick || (isPrep && !done)) && (
             <ThemedText type="subtitle" style={styles.segLabel}>
               {done ? 'Done' : label}
             </ThemedText>

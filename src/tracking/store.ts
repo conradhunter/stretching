@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useSyncExternalStore } from "react";
 
 import { recordSeconds, type StreakLog } from "./streaks";
+import { todayLocalDate } from "./today";
 
 const KEY = "tracking.v1";
 export const DEFAULT_GOAL_SECONDS = 15 * 60;
@@ -44,14 +45,6 @@ function subscribe(l: () => void) {
   return () => {
     listeners.delete(l);
   };
-}
-
-/** Today's local calendar date as "YYYY-MM-DD" (device timezone). */
-export function todayLocalDate(now: Date = new Date()): string {
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
 }
 
 /** Log stretched seconds against today, locking today's goal on first record. */

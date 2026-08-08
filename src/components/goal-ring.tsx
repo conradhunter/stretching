@@ -9,7 +9,8 @@ import { ThemedView } from '@/components/themed-view';
 import { BorderWidth, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { currentStreak, todayProgress } from '@/tracking/streaks';
-import { setGoalMinutes, todayLocalDate, useTracking } from '@/tracking/store';
+import { setGoalMinutes, useTracking } from '@/tracking/store';
+import { useTodayLocalDate } from '@/tracking/today';
 
 const GOAL_PRESETS = [5, 10, 15, 20, 30, 45, 60];
 
@@ -20,7 +21,7 @@ const GOAL_PRESETS = [5, 10, 15, 20, 30, 45, 60];
 export function GoalRing() {
   const theme = useTheme();
   const tracking = useTracking();
-  const today = todayLocalDate();
+  const today = useTodayLocalDate();
   const progress = todayProgress(tracking.log, today, tracking.goalSeconds);
   const streak = currentStreak(tracking.log, today);
   const [goalSheetOpen, setGoalSheetOpen] = useState(false);

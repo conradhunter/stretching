@@ -18,12 +18,23 @@ export default function TabsLayout() {
           borderTopWidth: BorderWidth,
         },
       }}>
+      {/* Quick is the `index` route so a cold launch (which always opens "/")
+          lands on it. Bar order: Stretches / Quick / Routines. */}
       <Tabs.Screen
-        name="index"
+        name="stretches"
         options={{
           title: 'Stretches',
           tabBarIcon: ({ color }) => (
             <SymbolView name="figure.flexibility" tintColor={color} size={26} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Quick',
+          tabBarIcon: ({ color }) => (
+            <SymbolView name="bolt.fill" tintColor={color} size={26} />
           ),
         }}
       />
@@ -33,15 +44,6 @@ export default function TabsLayout() {
           title: 'Routines',
           tabBarIcon: ({ color }) => (
             <SymbolView name="list.bullet" tintColor={color} size={26} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="quick"
-        options={{
-          title: 'Quick',
-          tabBarIcon: ({ color }) => (
-            <SymbolView name="bolt.fill" tintColor={color} size={26} />
           ),
         }}
       />

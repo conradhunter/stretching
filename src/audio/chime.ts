@@ -19,7 +19,14 @@ function getPlayer(): Player | null {
       return (player = null);
     }
 
-    const { createAudioPlayer } = require('expo-audio') as typeof import('expo-audio');
+    const { createAudioPlayer, setAudioModeAsync } =
+      require('expo-audio') as typeof import('expo-audio');
+    // Without this, the chime takes exclusive audio focus (iOS default
+    // .soloAmbient), which pauses whatever the user is playing (music/video).
+    // mixWithOthers lets the chime duck in over it instead.
+    setAudioModeAsync({ interruptionMode: 'mixWithOthers', playsInSilentMode: true }).catch(
+      (err) => console.warn('[chime] failed to set audio mode:', err)
+    );
     player = createAudioPlayer(require('../../assets/sounds/chime.mp3')) as Player;
   } catch (err) {
     console.warn('[chime] failed to init audio player:', err);

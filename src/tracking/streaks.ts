@@ -74,6 +74,26 @@ export function todayProgress(
   return { seconds, goalSeconds, fraction, met: seconds >= goalSeconds };
 }
 
+/**
+ * Merge `days` consecutive met days ending at `endDate` into the log, e.g. to
+ * restore a streak after a data wipe. Existing entries always win — only
+ * missing days are added.
+ */
+export function backfillMetDays(
+  log: StreakLog,
+  endDate: string,
+  days: number,
+  goalSeconds: number
+): StreakLog {
+  const merged = { ...log };
+  let date = endDate;
+  for (let i = 0; i < days; i++) {
+    merged[date] = merged[date] ?? { seconds: goalSeconds, goalSeconds };
+    date = previousDay(date);
+  }
+  return merged;
+}
+
 /** The longest run of consecutive met days anywhere in the log. */
 export function longestStreak(log: StreakLog): number {
   const metDays = Object.keys(log)

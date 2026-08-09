@@ -94,6 +94,31 @@ export function backfillMetDays(
   return merged;
 }
 
+/**
+ * Like backfillMetDays, but also tops up existing UNMET days in the window to
+ * their own locked goal so the whole window counts as met. Never reduces
+ * seconds and never touches already-met days.
+ */
+export function ensureMetDays(
+  log: StreakLog,
+  endDate: string,
+  days: number,
+  goalSeconds: number
+): StreakLog {
+  const merged = { ...log };
+  let date = endDate;
+  for (let i = 0; i < days; i++) {
+    const existing = merged[date];
+    if (!existing) {
+      merged[date] = { seconds: goalSeconds, goalSeconds };
+    } else if (!isMet(existing)) {
+      merged[date] = { ...existing, seconds: existing.goalSeconds };
+    }
+    date = previousDay(date);
+  }
+  return merged;
+}
+
 /** The longest run of consecutive met days anywhere in the log. */
 export function longestStreak(log: StreakLog): number {
   const metDays = Object.keys(log)

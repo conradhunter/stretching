@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   backfillMetDays,
   currentStreak,
+  ensureMetDays,
   longestStreak,
   recordSeconds,
   todayProgress,
@@ -175,5 +176,36 @@ describe("backfillMetDays", () => {
     backfillMetDays(input, "2026-08-08", 2, 900);
 
     expect(input).toEqual({});
+  });
+});
+
+describe("ensureMetDays", () => {
+  it("adds missing days as met", () => {
+    const log = ensureMetDays({}, "2026-08-08", 3, 900);
+
+    expect(log["2026-08-08"]).toEqual({ seconds: 900, goalSeconds: 900 });
+    expect(log["2026-08-06"]).toEqual({ seconds: 900, goalSeconds: 900 });
+    expect(currentStreak(log, "2026-08-09")).toBe(3);
+  });
+
+  it("tops up an unmet day to its own locked goal", () => {
+    const existing: StreakLog = { "2026-08-08": { seconds: 60, goalSeconds: 1800 } };
+    const log = ensureMetDays(existing, "2026-08-08", 1, 900);
+
+    expect(log["2026-08-08"]).toEqual({ seconds: 1800, goalSeconds: 1800 });
+  });
+
+  it("leaves already-met days untouched", () => {
+    const existing: StreakLog = { "2026-08-08": { seconds: 2000, goalSeconds: 600 } };
+    const log = ensureMetDays(existing, "2026-08-08", 1, 900);
+
+    expect(log["2026-08-08"]).toEqual({ seconds: 2000, goalSeconds: 600 });
+  });
+
+  it("does not mutate the input log", () => {
+    const input: StreakLog = { "2026-08-08": { seconds: 60, goalSeconds: 900 } };
+    ensureMetDays(input, "2026-08-08", 2, 900);
+
+    expect(input["2026-08-08"]).toEqual({ seconds: 60, goalSeconds: 900 });
   });
 });

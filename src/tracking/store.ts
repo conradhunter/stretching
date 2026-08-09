@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useSyncExternalStore } from "react";
 
-import { ensureMetDays, recordSeconds, type StreakLog } from "./streaks";
+import { recordSeconds, type StreakLog } from "./streaks";
 import { todayLocalDate } from "./today";
 
 const KEY = "tracking.v1";
@@ -18,28 +18,6 @@ function emit() {
   for (const l of listeners) l();
 }
 
-// One-time restore of the 37-day streak lost to the Aug 2026 same-version
-// reinstall. v2: the v1 never-overwrite backfill skipped Aug 8, which already
-// held a partial post-wipe test session, leaving the streak at 0 (and v1's
-// marker set) — so this tops unmet days in the window up to their own goal
-// under a fresh marker. Runs once (marker key), never reduces real data.
-// Safe to delete once it has run on the phone.
-const RESTORE_MARKER = "tracking.restore-2026-08-09.v2";
-
-async function restoreWipedStreak() {
-  try {
-    if (await AsyncStorage.getItem(RESTORE_MARKER)) return;
-    state = {
-      ...state,
-      log: ensureMetDays(state.log, "2026-08-08", 37, DEFAULT_GOAL_SECONDS),
-    };
-    persist();
-    await AsyncStorage.setItem(RESTORE_MARKER, "done");
-  } catch {
-    // best-effort; retried next launch if the marker write failed
-  }
-}
-
 async function init() {
   if (loaded) return;
   try {
@@ -54,7 +32,6 @@ async function init() {
   } catch {
     // keep defaults on a bad/empty read
   }
-  await restoreWipedStreak();
   loaded = true;
   emit();
 }

@@ -1,8 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import {
-  backfillMetDays,
   currentStreak,
-  ensureMetDays,
   longestStreak,
   recordSeconds,
   todayProgress,
@@ -149,63 +147,5 @@ describe("todayProgress", () => {
 
     expect(p.fraction).toBe(1);
     expect(p.met).toBe(true);
-  });
-});
-
-describe("backfillMetDays", () => {
-  it("adds N consecutive met days ending at endDate", () => {
-    const log = backfillMetDays({}, "2026-08-08", 37, 900);
-
-    expect(Object.keys(log).length).toBe(37);
-    expect(log["2026-08-08"]).toEqual({ seconds: 900, goalSeconds: 900 });
-    expect(log["2026-07-03"]).toEqual({ seconds: 900, goalSeconds: 900 }); // 37th day back
-    expect(log["2026-07-02"]).toBeUndefined();
-    expect(currentStreak(log, "2026-08-09")).toBe(37); // today unmet, counts from yesterday
-  });
-
-  it("never overwrites existing entries", () => {
-    const existing: StreakLog = { "2026-08-08": { seconds: 1200, goalSeconds: 600 } };
-    const log = backfillMetDays(existing, "2026-08-08", 3, 900);
-
-    expect(log["2026-08-08"]).toEqual({ seconds: 1200, goalSeconds: 600 });
-    expect(log["2026-08-07"]).toEqual({ seconds: 900, goalSeconds: 900 });
-  });
-
-  it("does not mutate the input log", () => {
-    const input: StreakLog = {};
-    backfillMetDays(input, "2026-08-08", 2, 900);
-
-    expect(input).toEqual({});
-  });
-});
-
-describe("ensureMetDays", () => {
-  it("adds missing days as met", () => {
-    const log = ensureMetDays({}, "2026-08-08", 3, 900);
-
-    expect(log["2026-08-08"]).toEqual({ seconds: 900, goalSeconds: 900 });
-    expect(log["2026-08-06"]).toEqual({ seconds: 900, goalSeconds: 900 });
-    expect(currentStreak(log, "2026-08-09")).toBe(3);
-  });
-
-  it("tops up an unmet day to its own locked goal", () => {
-    const existing: StreakLog = { "2026-08-08": { seconds: 60, goalSeconds: 1800 } };
-    const log = ensureMetDays(existing, "2026-08-08", 1, 900);
-
-    expect(log["2026-08-08"]).toEqual({ seconds: 1800, goalSeconds: 1800 });
-  });
-
-  it("leaves already-met days untouched", () => {
-    const existing: StreakLog = { "2026-08-08": { seconds: 2000, goalSeconds: 600 } };
-    const log = ensureMetDays(existing, "2026-08-08", 1, 900);
-
-    expect(log["2026-08-08"]).toEqual({ seconds: 2000, goalSeconds: 600 });
-  });
-
-  it("does not mutate the input log", () => {
-    const input: StreakLog = { "2026-08-08": { seconds: 60, goalSeconds: 900 } };
-    ensureMetDays(input, "2026-08-08", 2, 900);
-
-    expect(input["2026-08-08"]).toEqual({ seconds: 60, goalSeconds: 900 });
   });
 });

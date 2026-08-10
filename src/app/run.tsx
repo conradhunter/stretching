@@ -116,15 +116,23 @@ export default function RunScreen() {
     playChime();
   }, [timer.remaining, timer.status, timer.currentSegment.prep]);
 
-  // Credit stretched time toward the daily goal when leaving the run — once,
-  // with the cumulative total, so finishing and bailing early are both captured.
+  // Credit stretched time toward the daily goal as deltas at every segment
+  // boundary / pause / completion — NOT only on unmount. Unmount cleanups never
+  // run when the app is force-quit, and crediting only at exit meant a
+  // swipe-kill right after finishing silently lost the whole session (the
+  // "streak reset to 0 overnight" bug). The unmount credit stays as a catch-all
+  // for bailing out mid-segment.
   const elapsedRef = useRef(0);
   elapsedRef.current = timer.elapsedStretchSeconds;
-  useEffect(() => {
-    return () => {
-      recordStretchSeconds(elapsedRef.current);
-    };
-  }, []);
+  const creditedRef = useRef(0);
+  const credit = () => {
+    const delta = elapsedRef.current - creditedRef.current;
+    if (delta <= 0) return;
+    creditedRef.current = elapsedRef.current;
+    recordStretchSeconds(delta);
+  };
+  useEffect(credit, [timer.segmentIndex, timer.status]);
+  useEffect(() => credit, []);
 
   if (!plan) {
     return (

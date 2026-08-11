@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import {
   ensureMetDays,
   currentStreak,
+  updateDayGoal,
   longestStreak,
   recordSeconds,
   todayProgress,
@@ -178,5 +179,40 @@ describe("ensureMetDays", () => {
     ensureMetDays(input, "2026-08-08", 2, 900);
 
     expect(input["2026-08-08"]).toEqual({ seconds: 60, goalSeconds: 900 });
+  });
+});
+
+describe("updateDayGoal", () => {
+  it("re-locks an in-progress day's goal so the ring follows the live setting", () => {
+    const log: StreakLog = { "2026-08-11": { seconds: 300, goalSeconds: 900 } };
+    const updated = updateDayGoal(log, "2026-08-11", 1800);
+
+    expect(updated["2026-08-11"]).toEqual({ seconds: 300, goalSeconds: 1800 });
+    const p = todayProgress(updated, "2026-08-11", 1800);
+    expect(p.goalSeconds).toBe(1800);
+    expect(p.fraction).toBeCloseTo(300 / 1800);
+  });
+
+  it("lowering the goal below already-stretched time makes today met", () => {
+    const log: StreakLog = { "2026-08-11": { seconds: 600, goalSeconds: 900 } };
+    const updated = updateDayGoal(log, "2026-08-11", 300);
+
+    expect(todayProgress(updated, "2026-08-11", 300).met).toBe(true);
+  });
+
+  it("is a no-op for a day with no entry (untouched days use the live goal already)", () => {
+    const log: StreakLog = { "2026-08-10": met };
+    expect(updateDayGoal(log, "2026-08-11", 1800)).toEqual(log);
+  });
+
+  it("touches only the given day and does not mutate the input", () => {
+    const log: StreakLog = {
+      "2026-08-10": { seconds: 900, goalSeconds: 900 },
+      "2026-08-11": { seconds: 60, goalSeconds: 900 },
+    };
+    const updated = updateDayGoal(log, "2026-08-11", 1800);
+
+    expect(updated["2026-08-10"]).toEqual({ seconds: 900, goalSeconds: 900 });
+    expect(log["2026-08-11"]).toEqual({ seconds: 60, goalSeconds: 900 });
   });
 });

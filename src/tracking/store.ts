@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useSyncExternalStore } from "react";
 
-import { ensureMetDays, recordSeconds, type StreakLog } from "./streaks";
+import { ensureMetDays, recordSeconds, updateDayGoal, type StreakLog } from "./streaks";
 import { todayLocalDate } from "./today";
 
 const KEY = "tracking.v1";
@@ -81,10 +81,19 @@ export async function recordStretchSeconds(seconds: number) {
   persist();
 }
 
-/** Set the daily goal (in minutes). Affects today only if today has no sessions yet. */
+/**
+ * Set the daily goal (in minutes). Today's ring follows immediately — the
+ * in-progress day is re-locked to the new goal. Past days keep the goal they
+ * were logged under.
+ */
 export async function setGoalMinutes(minutes: number) {
   await init();
-  state = { ...state, goalSeconds: Math.max(MIN_GOAL_SECONDS, Math.round(minutes * 60)) };
+  const goalSeconds = Math.max(MIN_GOAL_SECONDS, Math.round(minutes * 60));
+  state = {
+    ...state,
+    goalSeconds,
+    log: updateDayGoal(state.log, todayLocalDate(), goalSeconds),
+  };
   emit();
   persist();
 }

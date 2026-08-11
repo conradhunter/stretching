@@ -16,8 +16,9 @@ function isMet(day: DayLog | undefined): boolean {
 
 /**
  * Add stretched seconds to a day. The day's goal is snapshotted on its first
- * session and never changes afterward, so editing the goal later can't rewrite
- * already-logged days.
+ * session so editing the goal later can't rewrite already-logged days; the
+ * still-in-progress day is the one exception — updateDayGoal re-locks it when
+ * the setting changes.
  */
 export function recordSeconds(
   log: StreakLog,
@@ -48,6 +49,18 @@ export function currentStreak(log: StreakLog, today: string): number {
     date = previousDay(date);
   }
   return count;
+}
+
+/**
+ * Re-lock one day's goal to the current setting — used for the in-progress day
+ * when the user edits the goal, so the ring (and tomorrow's met-judgment)
+ * follow the live setting instead of the value locked at the first session.
+ * No-op for days without an entry; never touches other days.
+ */
+export function updateDayGoal(log: StreakLog, date: string, goalSeconds: number): StreakLog {
+  const day = log[date];
+  if (!day || day.goalSeconds === goalSeconds) return log;
+  return { ...log, [date]: { ...day, goalSeconds } };
 }
 
 export type TodayProgress = {

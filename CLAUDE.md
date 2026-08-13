@@ -30,14 +30,17 @@ Expo Go does NOT work (this SDK is newer than public Expo Go) — use a **dev cl
 - `src/stretches/muscles.ts` — distinct-muscle list, usage ordering, `filterStretches`. `muscleUsage.ts` — persisted per-muscle tap counts (pills ordered by these).
 - `src/routines/routines.ts` — `Routine`/`RoutineItem` + pure `buildRoutineSegments` (10s "Next: …" prep before each stretch), `addItem`/`removeItem`/`moveItem`.
 - `src/routines/store.ts` — persisted saved routines. `quickRoutine.ts` — persisted "quick-add" cart.
-- `src/app/` — expo-router screens. Tabs: `(tabs)/index.tsx` (Stretches list, search + muscle pills + quick-add), `(tabs)/routines.tsx`. Pushed: `stretch/[id].tsx` (detail), `run.tsx` (timer — modes: `id`+`option` single, `routine`=id, `quick`=1), `quick-routine.tsx`, `routine/[id].tsx` (builder), `routine/add/[id].tsx` (picker).
+- `src/tracking/` — daily-goal streak. `streaks.ts` — **pure** day log (`recordSeconds` locks each day's goal at first session; `updateDayGoal` re-locks the in-progress day when the setting changes; `currentStreak` counts back from yesterday, so **one under-goal yesterday displays 0 with history intact** — check that before suspecting a wipe). `store.ts` — persisted log + goal; single-flight `init` that mutators await (a write must never race the disk load). `today.ts` — `useTodayLocalDate()`, the only midnight-safe way to render "today" (refreshes on AppState active + a just-past-midnight timer).
+- `src/components/goal-ring.tsx` — the streak ring (Quick + Stretches headers); tap opens the goal sheet. `src/audio/chime.ts` — segment chime (audio mode set to `mixWithOthers` so it never pauses the user's music).
+- `src/app/` — expo-router screens. Tabs: `(tabs)/index.tsx` (**Quick** — index so a cold launch lands on it; bar order Stretches / Quick / Routines), `(tabs)/stretches.tsx` (library list, search + muscle pills + quick-add), `(tabs)/routines.tsx`. Pushed: `stretch/[id].tsx` (detail), `run.tsx` (timer — modes: `id`+`option` single, `routine`=id, `quick`=1, bare `seconds`/`perSide`), `quick-routine.tsx`, `routine/[id].tsx` (builder), `routine/add/[id].tsx` (picker).
 
 ## Conventions
 - UI via `ThemedText` / `ThemedView` + `Spacing`/`Colors` from `src/constants/theme.ts`. Icons via `expo-symbols` `SymbolView` (SF Symbols; iOS-targeted).
 - **TDD** for pure logic (engine, hook, segments, muscles, routines) — see the `*.test.ts(x)` files. Stores (AsyncStorage) and screens are not unit-tested by design.
 
 ## Known gotchas
-- **Horizontal `ScrollView`s collapse vertically and clip content** (clipped pill descenders) — give them an explicit `height`. (See `pillsScroll` in `(tabs)/index.tsx`.)
+- **Horizontal `ScrollView`s collapse vertically and clip content** (clipped pill descenders) — give them an explicit `height`. (See `pillsScroll` in `(tabs)/stretches.tsx`.)
+- **Persist at natural boundaries, never only on unmount** — React cleanups don't run on force-quit, and AsyncStorage writes are async. Stretch time is credited per segment-advance/pause/completion in `run.tsx` (unmount is just a catch-all); deferring it to exit silently lost whole sessions.
 - **Local iOS builds require Xcode 26.5 / Swift 6.2+** (project is on the iOS 26 generation). EAS cloud builds work regardless; that's how it gets on the phone.
 - **Two `tsc` errors are expected**: `global.css` + an `animated-icon.module.css` import in template files — Expo generates their declarations on `expo start`. Anything else is real.
 
@@ -48,5 +51,6 @@ Expo Go does NOT work (this SDK is newer than public Expo Go) — use a **dev cl
   - Different bundle IDs ⇒ the dev client and the standalone **coexist** on-device instead of overwriting each other (the bug that prompted this setup).
 - Iterate: build the `development` dev client once (`eas build --profile development -p ios`), install "Stretches Dev", then `bun run start:dev` (QR, hot reload). The script sets `APP_VARIANT=development` so the QR's deep-link scheme matches the dev client. (`bunx expo run:ios --device` also works but needs Xcode 26.5.)
 - Standalone daily-driver: EAS `preview` profile (internal/ad-hoc, ~1yr). Needs the paid Apple Developer account. See README for the runbook.
+- **`ios.buildNumber` auto-increments on preview builds** (`autoIncrement` in eas.json, written back to app.json — commit the bump). Never ship two builds with the same version+buildNumber: iOS silently keeps the installed binary. Install new builds over the top — deleting the app wipes all AsyncStorage data.
 
 Design decisions & rationale live in this project's Claude memory (`MEMORY.md`).

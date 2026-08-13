@@ -87,31 +87,6 @@ export function todayProgress(
   return { seconds, goalSeconds, fraction, met: seconds >= goalSeconds };
 }
 
-/**
- * Top up the `days` consecutive days ending at `endDate` so all count as met:
- * missing days are created at `goalSeconds`; existing unmet days are raised to
- * their own locked goal. Never reduces seconds, never touches met days.
- */
-export function ensureMetDays(
-  log: StreakLog,
-  endDate: string,
-  days: number,
-  goalSeconds: number
-): StreakLog {
-  const merged = { ...log };
-  let date = endDate;
-  for (let i = 0; i < days; i++) {
-    const existing = merged[date];
-    if (!existing) {
-      merged[date] = { seconds: goalSeconds, goalSeconds };
-    } else if (!isMet(existing)) {
-      merged[date] = { ...existing, seconds: existing.goalSeconds };
-    }
-    date = previousDay(date);
-  }
-  return merged;
-}
-
 /** The longest run of consecutive met days anywhere in the log. */
 export function longestStreak(log: StreakLog): number {
   const metDays = Object.keys(log)

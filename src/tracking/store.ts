@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useSyncExternalStore } from "react";
 
-import { ensureMetDays, recordSeconds, updateDayGoal, type StreakLog } from "./streaks";
+import { recordSeconds, updateDayGoal, type StreakLog } from "./streaks";
 import { todayLocalDate } from "./today";
 
 const KEY = "tracking.v1";
@@ -34,27 +34,9 @@ function init(): Promise<void> {
     } catch {
       // keep defaults on a bad/empty read
     }
-    await restoreAug9();
     emit();
   })();
   return initPromise;
-}
-
-// One-time top-up of 2026-08-09: its final session was earned on-device but
-// lost to force-quit (recording only fired on unmount before the fix in
-// run.tsx), leaving the day under goal and the streak reading 0. Touches only
-// that day, never reduces anything. Safe to delete once it has run on-device.
-const RESTORE_MARKER = "tracking.restore-2026-08-10.v3";
-
-async function restoreAug9() {
-  try {
-    if (await AsyncStorage.getItem(RESTORE_MARKER)) return;
-    state = { ...state, log: ensureMetDays(state.log, "2026-08-09", 1, DEFAULT_GOAL_SECONDS) };
-    persist();
-    await AsyncStorage.setItem(RESTORE_MARKER, "done");
-  } catch {
-    // best-effort; retried next launch if the marker write failed
-  }
 }
 
 function persist() {

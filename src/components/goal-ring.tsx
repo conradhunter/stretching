@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -20,6 +21,7 @@ const GOAL_PRESETS = [5, 10, 15, 20, 30, 45, 60];
  */
 export function GoalRing() {
   const theme = useTheme();
+  const router = useRouter();
   const tracking = useTracking();
   const today = useTodayLocalDate();
   const progress = todayProgress(tracking.log, today, tracking.goalSeconds);
@@ -30,6 +32,7 @@ export function GoalRing() {
     <>
       <Pressable
         onPress={() => setGoalSheetOpen(true)}
+        onLongPress={() => router.push('/debug')}
         hitSlop={8}
         style={({ pressed }) => pressed && styles.pressed}>
         <ProgressRing fraction={progress.fraction} trackColor={theme.border} fillColor={theme.accent}>

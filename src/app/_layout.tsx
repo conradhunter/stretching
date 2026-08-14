@@ -42,6 +42,7 @@ export default function RootLayout() {
           name="run"
           options={{ headerShown: false, presentation: 'fullScreenModal' }}
         />
+        <Stack.Screen name="debug" options={{ title: 'Diagnostics' }} />
       </Stack>
     </ThemeProvider>
   );

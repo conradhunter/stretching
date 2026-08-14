@@ -2,7 +2,7 @@ export type DayLog = { seconds: number; goalSeconds: number };
 export type StreakLog = Record<string, DayLog>; // key: "YYYY-MM-DD" (local date)
 
 /** The "YYYY-MM-DD" calendar day before `date`. Pure string math, no real time. */
-function previousDay(date: string): string {
+export function previousDay(date: string): string {
   const [y, m, d] = date.split("-").map(Number);
   const t = new Date(Date.UTC(y, m - 1, d));
   t.setUTCDate(t.getUTCDate() - 1);

@@ -15,6 +15,12 @@ import { useTodayLocalDate } from '@/tracking/today';
 
 const GOAL_PRESETS = [5, 10, 15, 20, 30, 45, 60];
 
+function mmss(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 /**
  * The daily-goal progress ring (flame + streak count inside). Tapping it opens
  * the goal sheet. Self-contained so any tab header can show it.
@@ -35,7 +41,7 @@ export function GoalRing() {
         onLongPress={() => router.push('/debug')}
         hitSlop={8}
         style={({ pressed }) => pressed && styles.pressed}>
-        <ProgressRing fraction={progress.fraction} trackColor={theme.border} fillColor={theme.accent}>
+        <ProgressRing fraction={progress.ring} trackColor={theme.border} fillColor={theme.accent}>
           <View style={styles.ringCenter}>
             <SymbolView
               name="flame.fill"
@@ -58,6 +64,10 @@ export function GoalRing() {
               <ThemedText type="subtitle">Daily goal</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
                 Minutes of stretching per day
+              </ThemedText>
+              <ThemedText type="small" themeColor={progress.met ? undefined : 'textSecondary'}>
+                {mmss(progress.seconds)} of {mmss(progress.goalSeconds)} today
+                {progress.met ? ' ✓' : ` — ${mmss(progress.goalSeconds - progress.seconds)} to go`}
               </ThemedText>
               <View style={styles.goalGrid}>
                 {GOAL_PRESETS.map((min) => {

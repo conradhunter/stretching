@@ -139,7 +139,7 @@ describe("todayProgress", () => {
   it("uses the current goal when today has no sessions yet", () => {
     const p = todayProgress({}, "2026-05-26", 600);
 
-    expect(p).toEqual({ seconds: 0, goalSeconds: 600, fraction: 0, met: false });
+    expect(p).toEqual({ seconds: 0, goalSeconds: 600, fraction: 0, ring: 0, met: false });
   });
 
   it("clamps the fraction at 1 and marks met when over goal", () => {
@@ -148,6 +148,26 @@ describe("todayProgress", () => {
 
     expect(p.fraction).toBe(1);
     expect(p.met).toBe(true);
+  });
+
+  it("never renders a near-miss as a closed ring (the Aug 13 trap)", () => {
+    // 1185/1200 = 98.75% — visually indistinguishable from full on a small
+    // ring, which read as "goal met" and silently broke the streak overnight.
+    const log: StreakLog = { "2026-08-13": { seconds: 1185, goalSeconds: 1200 } };
+    const p = todayProgress(log, "2026-08-13", 1200);
+
+    expect(p.met).toBe(false);
+    expect(p.ring).toBeLessThanOrEqual(0.92);
+  });
+
+  it("only a truly met day closes the ring", () => {
+    const log: StreakLog = { "2026-08-13": { seconds: 1200, goalSeconds: 1200 } };
+    expect(todayProgress(log, "2026-08-13", 1200).ring).toBe(1);
+  });
+
+  it("keeps the ring honest below the cap", () => {
+    const log: StreakLog = { "2026-08-13": { seconds: 600, goalSeconds: 1200 } };
+    expect(todayProgress(log, "2026-08-13", 1200).ring).toBeCloseTo(0.5);
   });
 });
 describe("updateDayGoal", () => {

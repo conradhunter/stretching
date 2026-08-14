@@ -50,9 +50,34 @@ function init(): Promise<void> {
       // keep defaults on a bad read, but leave the evidence in the trail
       void logDiag("init-error", String(e));
     }
+    await restoreAug13();
     emit();
   })();
   return initPromise;
+}
+
+// One-time top-up of 2026-08-13: it sat at 1185/1200s — the user stretched to
+// a ring that rendered 98.75% as closed and reasonably stopped, so the 15s
+// shortfall is the app's fault (fixed via the unmet ring cap in streaks.ts).
+// Touches only that day, never reduces anything. Delete once run on-device.
+const RESTORE_MARKER = "tracking.restore-2026-08-14";
+
+async function restoreAug13() {
+  try {
+    if (await AsyncStorage.getItem(RESTORE_MARKER)) return;
+    const day = state.log["2026-08-13"];
+    if (day && day.seconds < day.goalSeconds) {
+      state = {
+        ...state,
+        log: { ...state.log, "2026-08-13": { ...day, seconds: day.goalSeconds } },
+      };
+      void logDiag("restore", `2026-08-13 topped up to ${day.goalSeconds}s`);
+      persist();
+    }
+    await AsyncStorage.setItem(RESTORE_MARKER, "done");
+  } catch {
+    // best-effort; retried next launch if the marker write failed
+  }
 }
 
 // Second copy of the log, replaced only when it gains met days — a wiped or

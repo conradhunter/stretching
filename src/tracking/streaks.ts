@@ -66,9 +66,16 @@ export function updateDayGoal(log: StreakLog, date: string, goalSeconds: number)
 export type TodayProgress = {
   seconds: number;
   goalSeconds: number;
-  fraction: number; // clamped 0..1, for the ring arc
+  fraction: number; // true progress, clamped 0..1
+  ring: number; // what the ring should draw: closes ONLY when met
   met: boolean;
 };
+
+// An unmet day never draws past this, so the ring always shows a visible gap.
+// Without it, 1185/1200 (98.75%) rendered as a closed ring on the tiny header
+// ring — the user read "goal met", stopped 15s short, and the streak broke
+// overnight (the Aug 13 2026 incident).
+const UNMET_RING_CAP = 0.92;
 
 /**
  * Today's progress for the ring. Uses the day's locked goal if it already has
@@ -83,8 +90,10 @@ export function todayProgress(
   const day = log[today];
   const seconds = day?.seconds ?? 0;
   const goalSeconds = day?.goalSeconds ?? currentGoalSeconds;
+  const met = seconds >= goalSeconds;
   const fraction = goalSeconds > 0 ? Math.min(1, seconds / goalSeconds) : 1;
-  return { seconds, goalSeconds, fraction, met: seconds >= goalSeconds };
+  const ring = met ? 1 : Math.min(fraction, UNMET_RING_CAP);
+  return { seconds, goalSeconds, fraction, ring, met };
 }
 
 /** The longest run of consecutive met days anywhere in the log. */

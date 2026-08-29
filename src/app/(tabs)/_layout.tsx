@@ -19,13 +19,22 @@ export default function TabsLayout() {
         },
       }}>
       {/* Quick is the `index` route so a cold launch (which always opens "/")
-          lands on it. */}
+          lands on it. Bar order: Quick / Exercises. */}
       <Tabs.Screen
         name="index"
         options={{
           title: 'Quick',
           tabBarIcon: ({ color }) => (
             <SymbolView name="bolt.fill" tintColor={color} size={26} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="exercises"
+        options={{
+          title: 'Exercises',
+          tabBarIcon: ({ color }) => (
+            <SymbolView name="figure.strengthtraining.traditional" tintColor={color} size={26} />
           ),
         }}
       />

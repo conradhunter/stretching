@@ -18,7 +18,7 @@ import { ProgressRing } from '@/components/progress-ring';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BorderWidth, Radius, Spacing } from '@/constants/theme';
-import { EXERCISES, type Exercise } from '@/exercises/exercises';
+import { EXERCISES, getExercise, type Exercise } from '@/exercises/exercises';
 import { useExerciseLog } from '@/exercises/store';
 import { useTheme } from '@/hooks/use-theme';
 import { currentStreak, todayProgress, type PartProgress } from '@/tracking/streaks';
@@ -34,10 +34,12 @@ function mmss(seconds: number): string {
 }
 
 /**
- * The daily-goal progress ring (flame + streak count inside). Tapping it opens
- * the goal sheet. Self-contained so any tab header can show it.
+ * A tab header with the daily goal in it: the screen title and the streak ring
+ * (flame + streak count inside), then a count pill per exercise that has a rep
+ * target. Anything here opens the goal sheet. The pills sit on their own row so
+ * three targets can't squeeze the title.
  */
-export function GoalRing() {
+export function GoalHeader({ title }: { title: string }) {
   const theme = useTheme();
   const router = useRouter();
   const tracking = useTracking();
@@ -54,26 +56,45 @@ export function GoalRing() {
     todayReps
   );
   const streak = currentStreak(tracking.log, today, exerciseLog);
+  // streaks.ts orders parts by id (it has no catalog); show them in the order
+  // the sheet and the Exercises tab use, so the three lists agree.
+  const parts = EXERCISES.map((e) => progress.parts.find((p) => p.exerciseId === e.id)).filter(
+    (p) => p != null
+  );
   const [goalSheetOpen, setGoalSheetOpen] = useState(false);
 
   return (
-    <>
-      <Pressable
-        onPress={() => setGoalSheetOpen(true)}
-        onLongPress={() => router.push('/debug')}
-        hitSlop={8}
-        style={({ pressed }) => pressed && styles.pressed}>
-        <ProgressRing fraction={progress.ring} trackColor={theme.border} fillColor={theme.accent}>
-          <View style={styles.ringCenter}>
-            <SymbolView
-              name="flame.fill"
-              tintColor={progress.met ? theme.accent : theme.textSecondary}
-              size={11}
-            />
-            <Text style={[styles.ringStreak, { color: theme.text }]}>{streak}</Text>
-          </View>
-        </ProgressRing>
-      </Pressable>
+    <View style={styles.header}>
+      <View style={styles.titleRow}>
+        <ThemedText type="subtitle">{title}</ThemedText>
+        <Pressable
+          onPress={() => setGoalSheetOpen(true)}
+          onLongPress={() => router.push('/debug')}
+          hitSlop={8}
+          style={({ pressed }) => pressed && styles.pressed}>
+          <ProgressRing fraction={progress.ring} trackColor={theme.border} fillColor={theme.accent}>
+            <View style={styles.ringCenter}>
+              <SymbolView
+                name="flame.fill"
+                tintColor={progress.met ? theme.accent : theme.textSecondary}
+                size={11}
+              />
+              <Text style={[styles.ringStreak, { color: theme.text }]}>{streak}</Text>
+            </View>
+          </ProgressRing>
+        </Pressable>
+      </View>
+
+      {/* One pill per target, so an outstanding rep goal is never invisible —
+          with all parts required, a hidden target is a streak that breaks
+          without warning. */}
+      {parts.length > 0 && (
+        <View style={styles.pillRow}>
+          {parts.map((part) => (
+            <TargetPill key={part.exerciseId} part={part} onPress={() => setGoalSheetOpen(true)} />
+          ))}
+        </View>
+      )}
 
       <Modal
         visible={goalSheetOpen}
@@ -140,7 +161,34 @@ export function GoalRing() {
           </KeyboardAvoidingView>
         </Pressable>
       </Modal>
-    </>
+    </View>
+  );
+}
+
+/**
+ * A target's standing as a header pill: "Push-ups 12/20", accent once hit.
+ * Named in words rather than an icon — the SF Symbols for these movements are
+ * too alike at this size to tell push-ups from pull-ups at a glance.
+ */
+function TargetPill({ part, onPress }: { part: PartProgress; onPress: () => void }) {
+  const theme = useTheme();
+  const exercise = getExercise(part.exerciseId);
+  const color = part.met ? theme.accent : theme.text;
+
+  return (
+    <Pressable onPress={onPress} hitSlop={6} style={({ pressed }) => pressed && styles.pressed}>
+      <ThemedView
+        type="backgroundElement"
+        style={[styles.pill, { borderColor: part.met ? theme.accent : theme.border }]}>
+        <Text style={[styles.pillLabel, { color: theme.textSecondary }]}>
+          {exercise?.name ?? part.exerciseId}
+        </Text>
+        <Text style={[styles.pillText, { color }]}>
+          {part.reps}/{part.target}
+          {part.met ? ' ✓' : ''}
+        </Text>
+      </ThemedView>
+    </Pressable>
   );
 }
 
@@ -223,6 +271,21 @@ function GoalChip({
 }
 
 const styles = StyleSheet.create({
+  header: { paddingTop: Spacing.two, paddingBottom: Spacing.three, gap: Spacing.two },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  // Wraps, so a narrow phone with three targets stacks instead of clipping.
+  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+    borderWidth: BorderWidth,
+    borderRadius: Radius.full,
+  },
+  pillLabel: { fontSize: 11, lineHeight: 14 },
+  pillText: { fontSize: 11, fontWeight: '700', fontVariant: ['tabular-nums'], lineHeight: 14 },
   ringCenter: { alignItems: 'center', justifyContent: 'center' },
   ringStreak: { fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'], lineHeight: 16 },
   sheetBackdrop: {

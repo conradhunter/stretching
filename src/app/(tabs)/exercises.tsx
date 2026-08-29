@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { GoalRing } from '@/components/goal-ring';
+import { GoalHeader } from '@/components/goal-ring';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BorderWidth, Radius, Spacing } from '@/constants/theme';
@@ -41,12 +41,9 @@ export default function ExercisesScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
-        <View style={styles.header}>
-          <ThemedText type="subtitle">Exercises</ThemedText>
-          {/* Same ring as Quick: a rep target added to the daily goal is only
-              honest if today's standing is visible where the reps get done. */}
-          <GoalRing />
-        </View>
+        {/* Same header as Quick: a rep target added to the daily goal is only
+            honest if today's standing is visible where the reps get done. */}
+        <GoalHeader title="Exercises" />
 
         <ThemedText type="small" themeColor="textSecondary" style={styles.sectionLabel}>
           Exercise
@@ -166,13 +163,6 @@ export default function ExercisesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1, paddingHorizontal: Spacing.three },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: Spacing.two,
-    paddingBottom: Spacing.three,
-  },
   sectionLabel: { marginTop: Spacing.three, marginBottom: Spacing.two },
   segmented: { flexDirection: 'row', borderRadius: Radius.lg, overflow: 'hidden' },
   segment: {

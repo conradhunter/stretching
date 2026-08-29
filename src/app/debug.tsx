@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useExerciseLog } from '@/exercises/store';
 import { useDiagEvents } from '@/tracking/diagStore';
 import { lastNDays, metDayCount } from '@/tracking/forensics';
 import { currentStreak, type StreakLog } from '@/tracking/streaks';
@@ -28,7 +29,11 @@ function readKey(key: string): Promise<DiskRead> {
       return {
         status: 'ok',
         raw,
-        data: { log: parsed.log ?? {}, goalSeconds: parsed.goalSeconds ?? 0 },
+        data: {
+          log: parsed.log ?? {},
+          goalSeconds: parsed.goalSeconds ?? 0,
+          repTargets: parsed.repTargets ?? {},
+        },
       };
     })
     .catch((e): DiskRead => ({ status: 'error', message: String(e) }));
@@ -48,6 +53,7 @@ function summarize(log: StreakLog): string {
 export default function DebugScreen() {
   const theme = useTheme();
   const tracking = useTracking();
+  const exerciseLog = useExerciseLog();
   const today = useTodayLocalDate();
   const events = useDiagEvents();
   const [disk, setDisk] = useState<DiskRead>({ status: 'loading' });
@@ -103,7 +109,9 @@ export default function DebugScreen() {
       <ThemedView bordered style={styles.card}>
         <ThemedText type="subtitle">Computed</ThemedText>
         <ThemedText type="small" style={styles.mono}>
-          today {today} · streak {currentStreak(tracking.log, today)} · goal {tracking.goalSeconds}s
+          today {today} · streak {currentStreak(tracking.log, today, exerciseLog)} · goal{' '}
+          {tracking.goalSeconds}s
+          {Object.entries(tracking.repTargets).map(([id, reps]) => ` · ${id} ${reps}`)}
         </ThemedText>
       </ThemedView>
 

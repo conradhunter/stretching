@@ -3,7 +3,7 @@ import { useEffect, useSyncExternalStore } from "react";
 
 import { logDiag } from "./diagStore";
 import { metDayCount, shouldReplaceBackup } from "./forensics";
-import { recordSeconds, updateDayGoal, type StreakLog } from "./streaks";
+import { recordSeconds, updateDayGoal, type RepTargets, type StreakLog } from "./streaks";
 import { todayLocalDate } from "./today";
 
 export const TRACKING_KEY = "tracking.v1";
@@ -11,9 +11,14 @@ export const BACKUP_KEY = "tracking.v1.backup";
 export const DEFAULT_GOAL_SECONDS = 15 * 60;
 const MIN_GOAL_SECONDS = 60;
 
-export type Tracking = { log: StreakLog; goalSeconds: number };
+/**
+ * The daily goal: stretched minutes, plus optional per-exercise rep targets.
+ * With a target set, the day is met only when the time AND every target is hit
+ * (see `isMet` in streaks.ts) — an empty `repTargets` is the plain time goal.
+ */
+export type Tracking = { log: StreakLog; goalSeconds: number; repTargets: RepTargets };
 
-let state: Tracking = { log: {}, goalSeconds: DEFAULT_GOAL_SECONDS };
+let state: Tracking = { log: {}, goalSeconds: DEFAULT_GOAL_SECONDS, repTargets: {} };
 let initPromise: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 
@@ -40,6 +45,7 @@ function init(): Promise<void> {
         state = {
           log: parsed.log ?? {},
           goalSeconds: parsed.goalSeconds ?? DEFAULT_GOAL_SECONDS,
+          repTargets: parsed.repTargets ?? {},
         };
         void logDiag("init", `read ${raw.length}B, ${describeLog(state.log)}`);
         void backupIfGrown(state.log, state.goalSeconds);
@@ -91,7 +97,7 @@ export async function recordStretchSeconds(seconds: number) {
   const date = todayLocalDate();
   state = {
     ...state,
-    log: recordSeconds(state.log, date, whole, state.goalSeconds),
+    log: recordSeconds(state.log, date, whole, state.goalSeconds, state.repTargets),
   };
   const day = state.log[date];
   void logDiag("credit", `${date} +${whole}s -> ${day.seconds}/${day.goalSeconds}s`);
@@ -110,9 +116,29 @@ export async function setGoalMinutes(minutes: number) {
   state = {
     ...state,
     goalSeconds,
-    log: updateDayGoal(state.log, todayLocalDate(), goalSeconds),
+    log: updateDayGoal(state.log, todayLocalDate(), goalSeconds, state.repTargets),
   };
   void logDiag("goal", `${goalSeconds}s`);
+  emit();
+  persist();
+}
+
+/**
+ * Add or clear an exercise's daily rep target (0 clears it). Like the minutes
+ * goal, the in-progress day is re-locked so today follows the live setting;
+ * past days keep the targets they were logged under.
+ */
+export async function setExerciseTarget(exerciseId: string, reps: number) {
+  await init();
+  const repTargets = { ...state.repTargets };
+  if (reps > 0) repTargets[exerciseId] = Math.round(reps);
+  else delete repTargets[exerciseId];
+  state = {
+    ...state,
+    repTargets,
+    log: updateDayGoal(state.log, todayLocalDate(), state.goalSeconds, repTargets),
+  };
+  void logDiag("target", `${exerciseId} ${reps > 0 ? `${Math.round(reps)} reps` : "off"}`);
   emit();
   persist();
 }

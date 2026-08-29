@@ -36,8 +36,6 @@ export default function RootLayout() {
       <AnimatedSplashOverlay />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="stretch/[id]" options={{ title: '' }} />
-        <Stack.Screen name="stretch/new" options={{ presentation: 'modal', title: 'New Stretch' }} />
         <Stack.Screen
           name="run"
           options={{ headerShown: false, presentation: 'fullScreenModal' }}

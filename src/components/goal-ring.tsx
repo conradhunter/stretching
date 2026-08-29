@@ -2,15 +2,27 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { ProgressRing } from '@/components/progress-ring';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BorderWidth, Radius, Spacing } from '@/constants/theme';
+import { EXERCISES, type Exercise } from '@/exercises/exercises';
+import { useExerciseLog } from '@/exercises/store';
 import { useTheme } from '@/hooks/use-theme';
-import { currentStreak, todayProgress } from '@/tracking/streaks';
-import { setGoalMinutes, useTracking } from '@/tracking/store';
+import { currentStreak, todayProgress, type PartProgress } from '@/tracking/streaks';
+import { setExerciseTarget, setGoalMinutes, useTracking } from '@/tracking/store';
 import { useTodayLocalDate } from '@/tracking/today';
 
 const GOAL_PRESETS = [5, 10, 15, 20, 30, 45, 60];
@@ -29,9 +41,19 @@ export function GoalRing() {
   const theme = useTheme();
   const router = useRouter();
   const tracking = useTracking();
+  const exerciseLog = useExerciseLog();
   const today = useTodayLocalDate();
-  const progress = todayProgress(tracking.log, today, tracking.goalSeconds);
-  const streak = currentStreak(tracking.log, today);
+  const todayReps = exerciseLog[today] ?? {};
+  // The ring's fill is stretch time, but it only closes when the whole goal —
+  // time plus every rep target — is met, so it can never read "done" early.
+  const progress = todayProgress(
+    tracking.log,
+    today,
+    tracking.goalSeconds,
+    tracking.repTargets,
+    todayReps
+  );
+  const streak = currentStreak(tracking.log, today, exerciseLog);
   const [goalSheetOpen, setGoalSheetOpen] = useState(false);
 
   return (
@@ -59,53 +81,144 @@ export function GoalRing() {
         animationType="fade"
         onRequestClose={() => setGoalSheetOpen(false)}>
         <Pressable style={styles.sheetBackdrop} onPress={() => setGoalSheetOpen(false)}>
-          <Pressable onPress={() => {}} style={styles.sheetStop}>
-            <ThemedView type="backgroundElement" bordered style={styles.sheet}>
-              <ThemedText type="subtitle">Daily goal</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                Minutes of stretching per day
-              </ThemedText>
-              <ThemedText type="small" themeColor={progress.met ? undefined : 'textSecondary'}>
-                {mmss(progress.seconds)} of {mmss(progress.goalSeconds)} today
-                {progress.met ? ' ✓' : ` — ${mmss(progress.goalSeconds - progress.seconds)} to go`}
-              </ThemedText>
-              <View style={styles.goalGrid}>
-                {GOAL_PRESETS.map((min) => {
-                  const active = Math.round(tracking.goalSeconds / 60) === min;
-                  return (
-                    <Pressable
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.sheetStop}>
+            <Pressable onPress={() => Keyboard.dismiss()}>
+              <ThemedView type="backgroundElement" bordered style={styles.sheet}>
+                <ThemedText type="subtitle">Daily goal</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  Minutes of stretching per day
+                </ThemedText>
+                <ThemedText type="small" themeColor={progress.timeMet ? undefined : 'textSecondary'}>
+                  {mmss(progress.seconds)} of {mmss(progress.goalSeconds)} today
+                  {progress.timeMet
+                    ? ' ✓'
+                    : ` — ${mmss(progress.goalSeconds - progress.seconds)} to go`}
+                </ThemedText>
+                <View style={styles.goalGrid}>
+                  {GOAL_PRESETS.map((min) => (
+                    <GoalChip
                       key={min}
+                      label={String(min)}
+                      active={Math.round(tracking.goalSeconds / 60) === min}
                       onPress={() => {
                         setGoalMinutes(min);
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setGoalSheetOpen(false);
                       }}
-                      style={({ pressed }) => pressed && styles.pressed}>
-                      <ThemedView
-                        type="backgroundElement"
-                        style={[
-                          styles.goalChip,
-                          active
-                            ? { backgroundColor: theme.accent, borderColor: theme.accent }
-                            : { borderColor: theme.border },
-                        ]}>
-                        <Text
-                          style={[
-                            styles.goalChipText,
-                            { color: active ? theme.accentForeground : theme.text },
-                          ]}>
-                          {min}
-                        </Text>
-                      </ThemedView>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ThemedView>
-          </Pressable>
+                    />
+                  ))}
+                </View>
+
+                <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
+                <ThemedText type="small" themeColor="textSecondary">
+                  Reps per day — leave blank for no target. With one set, the day only counts once
+                  it’s hit as well.
+                </ThemedText>
+                {EXERCISES.map((exercise) => (
+                  <TargetRow
+                    key={exercise.id}
+                    exercise={exercise}
+                    target={tracking.repTargets[exercise.id] ?? 0}
+                    part={progress.parts.find((p) => p.exerciseId === exercise.id)}
+                  />
+                ))}
+
+                <Pressable
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setGoalSheetOpen(false);
+                  }}
+                  style={({ pressed }) => [styles.doneWrap, pressed && styles.pressed]}>
+                  <View style={[styles.done, { backgroundColor: theme.accent }]}>
+                    <Text style={[styles.doneText, { color: theme.accentForeground }]}>Done</Text>
+                  </View>
+                </Pressable>
+              </ThemedView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </>
+  );
+}
+
+/**
+ * One exercise's daily rep target: a plain number field, since the useful
+ * numbers are personal and change as you get stronger — presets can't cover
+ * them. Empty (or 0) means no target for that exercise.
+ */
+function TargetRow({
+  exercise,
+  target,
+  part,
+}: {
+  exercise: Exercise;
+  target: number;
+  part: PartProgress | undefined;
+}) {
+  const theme = useTheme();
+  // `draft` holds what's being typed (including empty) so the field doesn't
+  // fight the store mid-edit; outside an edit the store is the truth.
+  const [draft, setDraft] = useState<string | null>(null);
+  const value = draft ?? (target > 0 ? String(target) : '');
+
+  return (
+    <View style={styles.targetRow}>
+      <View style={styles.targetLabel}>
+        <ThemedText type="small">{exercise.name}</ThemedText>
+        <ThemedText type="small" themeColor={part?.met ? undefined : 'textSecondary'}>
+          {part ? `${part.reps} of ${part.target} today${part.met ? ' ✓' : ''}` : 'no target'}
+        </ThemedText>
+      </View>
+      <TextInput
+        value={value}
+        onChangeText={(text) => {
+          const digits = text.replace(/[^0-9]/g, '').slice(0, 4);
+          setDraft(digits);
+          setExerciseTarget(exercise.id, digits === '' ? 0 : Number(digits));
+        }}
+        onBlur={() => setDraft(null)}
+        keyboardType="number-pad"
+        placeholder="Off"
+        placeholderTextColor={theme.textSecondary}
+        selectTextOnFocus
+        style={[
+          styles.targetInput,
+          { color: theme.text, borderColor: theme.border, backgroundColor: theme.background },
+        ]}
+      />
+    </View>
+  );
+}
+
+function GoalChip({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => pressed && styles.pressed}>
+      <ThemedView
+        type="backgroundElement"
+        style={[
+          styles.goalChip,
+          active
+            ? { backgroundColor: theme.accent, borderColor: theme.accent }
+            : { borderColor: theme.border },
+        ]}>
+        <Text
+          style={[styles.goalChipText, { color: active ? theme.accentForeground : theme.text }]}>
+          {label}
+        </Text>
+      </ThemedView>
+    </Pressable>
   );
 }
 
@@ -119,6 +232,29 @@ const styles = StyleSheet.create({
   },
   sheetStop: { padding: Spacing.three, paddingBottom: Spacing.six },
   sheet: { borderRadius: Radius.lg, padding: Spacing.four, gap: Spacing.two },
+  divider: { height: BorderWidth, marginVertical: Spacing.two },
+  targetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.three,
+    marginTop: Spacing.two,
+  },
+  targetLabel: { flex: 1, gap: Spacing.half },
+  targetInput: {
+    width: 80,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderWidth: BorderWidth,
+    borderRadius: Radius.md,
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    fontVariant: ['tabular-nums'],
+  },
+  doneWrap: { marginTop: Spacing.four },
+  done: { borderRadius: Radius.md, paddingVertical: Spacing.three, alignItems: 'center' },
+  doneText: { fontSize: 16, fontWeight: '600' },
   goalGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, marginTop: Spacing.two },
   goalChip: {
     minWidth: 52,

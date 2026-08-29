@@ -5,13 +5,15 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { GoalRing } from '@/components/goal-ring';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BorderWidth, Radius, Spacing } from '@/constants/theme';
 import { EXERCISES, sessionSeconds, type Exercise } from '@/exercises/exercises';
-import { dayTotal, repsOn } from '@/exercises/log';
+import { repsOn } from '@/exercises/log';
 import { useExerciseLog } from '@/exercises/store';
 import { useTheme } from '@/hooks/use-theme';
+import { useTracking } from '@/tracking/store';
 import { formatDuration } from '@/timer/quick';
 import { useTodayLocalDate } from '@/tracking/today';
 
@@ -19,6 +21,7 @@ export default function ExercisesScreen() {
   const theme = useTheme();
   const router = useRouter();
   const log = useExerciseLog();
+  const tracking = useTracking();
   const today = useTodayLocalDate();
 
   const [exercise, setExercise] = useState<Exercise>(EXERCISES[0]);
@@ -33,16 +36,16 @@ export default function ExercisesScreen() {
   };
 
   const done = repsOn(log, today, exercise.id);
-  const total = dayTotal(log, today);
+  const target = tracking.repTargets[exercise.id] ?? 0;
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.header}>
           <ThemedText type="subtitle">Exercises</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            {total === 0 ? 'none today' : `${total} reps today`}
-          </ThemedText>
+          {/* Same ring as Quick: a rep target added to the daily goal is only
+              honest if today's standing is visible where the reps get done. */}
+          <GoalRing />
         </View>
 
         <ThemedText type="small" themeColor="textSecondary" style={styles.sectionLabel}>
@@ -122,21 +125,38 @@ export default function ExercisesScreen() {
           </View>
         </Pressable>
 
-        <ThemedText type="small" themeColor="textSecondary" style={styles.todayLine}>
-          {done > 0
-            ? `${done} ${exercise.name.toLowerCase()} today`
-            : `No ${exercise.name.toLowerCase()} yet today`}
+        <ThemedText
+          type="small"
+          themeColor={target > 0 && done >= target ? undefined : 'textSecondary'}
+          style={styles.todayLine}>
+          {target > 0
+            ? `${done} of ${target} ${exercise.name.toLowerCase()} today${done >= target ? ' ✓' : ''}`
+            : done > 0
+              ? `${done} ${exercise.name.toLowerCase()} today`
+              : `No ${exercise.name.toLowerCase()} yet today`}
         </ThemedText>
 
         <View style={[styles.summary, { borderTopColor: theme.border }]}>
-          {EXERCISES.map((option) => (
-            <View key={option.id} style={styles.summaryCell}>
-              <ThemedText style={styles.summaryCount}>{repsOn(log, today, option.id)}</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {option.name}
-              </ThemedText>
-            </View>
-          ))}
+          {EXERCISES.map((option) => {
+            const count = repsOn(log, today, option.id);
+            const goal = tracking.repTargets[option.id] ?? 0;
+            return (
+              <View key={option.id} style={styles.summaryCell}>
+                <ThemedText style={styles.summaryCount}>
+                  {count}
+                  {goal > 0 && (
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {' '}
+                      / {goal}
+                    </ThemedText>
+                  )}
+                </ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {option.name}
+                </ThemedText>
+              </View>
+            );
+          })}
         </View>
       </SafeAreaView>
     </ThemedView>

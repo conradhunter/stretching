@@ -139,7 +139,15 @@ describe("todayProgress", () => {
   it("uses the current goal when today has no sessions yet", () => {
     const p = todayProgress({}, "2026-05-26", 600);
 
-    expect(p).toEqual({ seconds: 0, goalSeconds: 600, fraction: 0, ring: 0, met: false });
+    expect(p).toEqual({
+      seconds: 0,
+      goalSeconds: 600,
+      fraction: 0,
+      ring: 0,
+      timeMet: false,
+      met: false,
+      parts: [],
+    });
   });
 
   it("clamps the fraction at 1 and marks met when over goal", () => {
@@ -202,5 +210,126 @@ describe("updateDayGoal", () => {
 
     expect(updated["2026-08-10"]).toEqual({ seconds: 900, goalSeconds: 900 });
     expect(log["2026-08-11"]).toEqual({ seconds: 60, goalSeconds: 900 });
+  });
+});
+
+// --- Optional exercise targets bolted onto the daily goal -------------------
+// A day with targets is met only when the stretch goal AND every target is hit.
+
+describe("recordSeconds with exercise targets", () => {
+  it("snapshots the day's rep targets alongside its goal", () => {
+    const log = recordSeconds({}, "2026-08-30", 120, 900, { pushups: 20 });
+
+    expect(log["2026-08-30"]).toEqual({
+      seconds: 120,
+      goalSeconds: 900,
+      repTargets: { pushups: 20 },
+    });
+  });
+
+  it("keeps the day's original targets when they change mid-day", () => {
+    const first = recordSeconds({}, "2026-08-30", 120, 900, { pushups: 20 });
+    const second = recordSeconds(first, "2026-08-30", 60, 900, { pushups: 50 });
+
+    expect(second["2026-08-30"].repTargets).toEqual({ pushups: 20 });
+  });
+
+  it("omits targets entirely when none are set", () => {
+    expect(recordSeconds({}, "2026-08-30", 120, 900, {})["2026-08-30"]).toEqual({
+      seconds: 120,
+      goalSeconds: 900,
+    });
+  });
+});
+
+describe("currentStreak with exercise targets", () => {
+  const withTarget = { seconds: 900, goalSeconds: 900, repTargets: { pushups: 20 } };
+
+  it("does not count a day whose stretch goal was met but whose reps fell short", () => {
+    const log: StreakLog = { "2026-08-29": withTarget, "2026-08-30": met };
+    const reps = { "2026-08-29": { pushups: 10 } };
+
+    expect(currentStreak(log, "2026-08-30", reps)).toBe(1); // today only
+  });
+
+  it("counts the day once every target is hit too", () => {
+    const log: StreakLog = { "2026-08-29": withTarget, "2026-08-30": met };
+    const reps = { "2026-08-29": { pushups: 20 } };
+
+    expect(currentStreak(log, "2026-08-30", reps)).toBe(2);
+  });
+
+  it("requires every target, not just one of them", () => {
+    const log: StreakLog = {
+      "2026-08-30": { seconds: 900, goalSeconds: 900, repTargets: { pushups: 20, crunches: 30 } },
+    };
+
+    expect(currentStreak(log, "2026-08-30", { "2026-08-30": { pushups: 20 } })).toBe(0);
+    expect(
+      currentStreak(log, "2026-08-30", { "2026-08-30": { pushups: 20, crunches: 30 } })
+    ).toBe(1);
+  });
+
+  it("judges days logged before targets existed on stretch time alone", () => {
+    const log: StreakLog = { "2026-08-29": met, "2026-08-30": met };
+
+    expect(currentStreak(log, "2026-08-30")).toBe(2);
+  });
+
+  it("counts over-target reps as met", () => {
+    const log: StreakLog = { "2026-08-30": withTarget };
+
+    expect(currentStreak(log, "2026-08-30", { "2026-08-30": { pushups: 25 } })).toBe(1);
+  });
+});
+
+describe("longestStreak with exercise targets", () => {
+  it("breaks a run on a day whose reps fell short", () => {
+    const log: StreakLog = {
+      "2026-08-28": met,
+      "2026-08-29": { seconds: 900, goalSeconds: 900, repTargets: { pushups: 20 } },
+      "2026-08-30": met,
+    };
+
+    expect(longestStreak(log, { "2026-08-29": { pushups: 5 } })).toBe(1);
+    expect(longestStreak(log, { "2026-08-29": { pushups: 20 } })).toBe(3);
+  });
+});
+
+describe("todayProgress with exercise targets", () => {
+  const log: StreakLog = {
+    "2026-08-30": { seconds: 900, goalSeconds: 900, repTargets: { pushups: 20 } },
+  };
+
+  it("reports each target as its own part", () => {
+    const progress = todayProgress(log, "2026-08-30", 900, {}, { pushups: 12 });
+
+    expect(progress.parts).toEqual([{ exerciseId: "pushups", reps: 12, target: 20, met: false }]);
+  });
+
+  it("keeps a gap in the ring while a target is outstanding, even at full stretch time", () => {
+    const progress = todayProgress(log, "2026-08-30", 900, {}, { pushups: 12 });
+
+    expect(progress.timeMet).toBe(true);
+    expect(progress.met).toBe(false);
+    expect(progress.ring).toBe(0.92); // the Aug 13 cap: never look closed unless it is
+  });
+
+  it("closes the ring once the stretch goal and every target are met", () => {
+    const progress = todayProgress(log, "2026-08-30", 900, {}, { pushups: 20 });
+
+    expect(progress.met).toBe(true);
+    expect(progress.ring).toBe(1);
+  });
+
+  it("uses the live targets for a day with no sessions yet", () => {
+    const progress = todayProgress({}, "2026-08-30", 900, { crunches: 30 }, { crunches: 30 });
+
+    expect(progress.parts).toEqual([{ exerciseId: "crunches", reps: 30, target: 30, met: true }]);
+    expect(progress.met).toBe(false); // stretch time still owed
+  });
+
+  it("has no parts when no targets are set", () => {
+    expect(todayProgress({}, "2026-08-30", 900).parts).toEqual([]);
   });
 });

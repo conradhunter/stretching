@@ -1,4 +1,11 @@
-export type DayLog = { seconds: number; goalSeconds: number };
+/** Optional rep goals bolted onto the daily goal: exercise id -> reps needed. */
+export type RepTargets = Record<string, number>;
+/** Reps actually done, by exercise id. Mirrors one day of the exercise log. */
+export type DayReps = Record<string, number>;
+/** Reps done per day — the exercise log, as this module needs to read it. */
+export type RepsByDate = Record<string, DayReps>;
+
+export type DayLog = { seconds: number; goalSeconds: number; repTargets?: RepTargets };
 export type StreakLog = Record<string, DayLog>; // key: "YYYY-MM-DD" (local date)
 
 /** The "YYYY-MM-DD" calendar day before `date`. Pure string math, no real time. */
@@ -9,9 +16,21 @@ export function previousDay(date: string): string {
   return t.toISOString().slice(0, 10);
 }
 
-/** A day is met once its stretched seconds reach the goal it was logged under. */
-function isMet(day: DayLog | undefined): boolean {
-  return day != null && day.seconds >= day.goalSeconds;
+/** Every rep target the day was logged under is satisfied by the reps done. */
+function targetsMet(targets: RepTargets | undefined, reps: DayReps | undefined): boolean {
+  if (!targets) return true;
+  return Object.entries(targets).every(([id, target]) => (reps?.[id] ?? 0) >= target);
+}
+
+/**
+ * A day is met once its stretched seconds reach the goal it was logged under
+ * AND every rep target locked onto it was hit. All parts are required — a day
+ * of push-ups with no stretching (or the reverse) does not carry the streak.
+ * Days logged before targets existed carry none, so history is judged on time
+ * alone.
+ */
+function isMet(day: DayLog | undefined, reps?: DayReps): boolean {
+  return day != null && day.seconds >= day.goalSeconds && targetsMet(day.repTargets, reps);
 }
 
 /**
@@ -24,14 +43,17 @@ export function recordSeconds(
   log: StreakLog,
   date: string,
   seconds: number,
-  goalSeconds: number
+  goalSeconds: number,
+  repTargets: RepTargets = {}
 ): StreakLog {
   const existing = log[date];
+  const targets = existing?.repTargets ?? (Object.keys(repTargets).length > 0 ? repTargets : undefined);
   return {
     ...log,
     [date]: {
       seconds: (existing?.seconds ?? 0) + seconds,
       goalSeconds: existing?.goalSeconds ?? goalSeconds,
+      ...(targets ? { repTargets: targets } : {}),
     },
   };
 }
@@ -41,10 +63,10 @@ export function recordSeconds(
  * reached goal yet it doesn't extend the streak, but it doesn't break it either
  * — we count back from yesterday. A fully missed past day ends the streak.
  */
-export function currentStreak(log: StreakLog, today: string): number {
-  let date = isMet(log[today]) ? today : previousDay(today);
+export function currentStreak(log: StreakLog, today: string, reps: RepsByDate = {}): number {
+  let date = isMet(log[today], reps[today]) ? today : previousDay(today);
   let count = 0;
-  while (isMet(log[date])) {
+  while (isMet(log[date], reps[date])) {
     count++;
     date = previousDay(date);
   }
@@ -57,18 +79,34 @@ export function currentStreak(log: StreakLog, today: string): number {
  * follow the live setting instead of the value locked at the first session.
  * No-op for days without an entry; never touches other days.
  */
-export function updateDayGoal(log: StreakLog, date: string, goalSeconds: number): StreakLog {
+export function updateDayGoal(
+  log: StreakLog,
+  date: string,
+  goalSeconds: number,
+  repTargets: RepTargets = {}
+): StreakLog {
   const day = log[date];
-  if (!day || day.goalSeconds === goalSeconds) return log;
-  return { ...log, [date]: { ...day, goalSeconds } };
+  if (!day) return log;
+  const targets = Object.keys(repTargets).length > 0 ? repTargets : undefined;
+  const sameTargets = JSON.stringify(day.repTargets ?? null) === JSON.stringify(targets ?? null);
+  if (day.goalSeconds === goalSeconds && sameTargets) return log;
+  return {
+    ...log,
+    [date]: { seconds: day.seconds, goalSeconds, ...(targets ? { repTargets: targets } : {}) },
+  };
 }
+
+/** One exercise target's standing today. */
+export type PartProgress = { exerciseId: string; reps: number; target: number; met: boolean };
 
 export type TodayProgress = {
   seconds: number;
   goalSeconds: number;
-  fraction: number; // true progress, clamped 0..1
-  ring: number; // what the ring should draw: closes ONLY when met
-  met: boolean;
+  fraction: number; // true stretch-time progress, clamped 0..1
+  ring: number; // what the ring should draw: closes ONLY when the whole day is met
+  timeMet: boolean; // the stretching part alone
+  met: boolean; // stretching AND every rep target
+  parts: PartProgress[]; // one per rep target, in id order
 };
 
 // An unmet day never draws past this, so the ring always shows a visible gap.
@@ -85,21 +123,33 @@ const UNMET_RING_CAP = 0.92;
 export function todayProgress(
   log: StreakLog,
   today: string,
-  currentGoalSeconds: number
+  currentGoalSeconds: number,
+  currentTargets: RepTargets = {},
+  todayReps: DayReps = {}
 ): TodayProgress {
   const day = log[today];
   const seconds = day?.seconds ?? 0;
   const goalSeconds = day?.goalSeconds ?? currentGoalSeconds;
-  const met = seconds >= goalSeconds;
+  const targets = day?.repTargets ?? currentTargets;
+  const timeMet = seconds >= goalSeconds;
+  const parts: PartProgress[] = Object.keys(targets)
+    .sort()
+    .map((exerciseId) => {
+      const reps = todayReps[exerciseId] ?? 0;
+      return { exerciseId, reps, target: targets[exerciseId], met: reps >= targets[exerciseId] };
+    });
+  const met = timeMet && parts.every((p) => p.met);
   const fraction = goalSeconds > 0 ? Math.min(1, seconds / goalSeconds) : 1;
+  // The fill still means stretch time — but an unmet day never closes, so a
+  // finished 15 minutes with push-ups still owed keeps its visible gap.
   const ring = met ? 1 : Math.min(fraction, UNMET_RING_CAP);
-  return { seconds, goalSeconds, fraction, ring, met };
+  return { seconds, goalSeconds, fraction, ring, timeMet, met, parts };
 }
 
 /** The longest run of consecutive met days anywhere in the log. */
-export function longestStreak(log: StreakLog): number {
+export function longestStreak(log: StreakLog, reps: RepsByDate = {}): number {
   const metDays = Object.keys(log)
-    .filter((d) => isMet(log[d]))
+    .filter((d) => isMet(log[d], reps[d]))
     .sort(); // ISO date strings sort chronologically
   let best = 0;
   let run = 0;

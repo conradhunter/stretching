@@ -7,8 +7,9 @@ down hands-free with chime + haptic cues.
 - **Timer engine** — pure, tick-driven, multi-segment (`src/timer/`).
 - **Exercises** — pick an exercise and a rep count; the set is paced phase by phase
   ("Down" / "Up") and reps are counted per day (`src/exercises/`).
-- **Tracking** — daily stretched-time goal + streak ring (`src/tracking/`). Exercise
-  reps are counted separately and never feed the goal.
+- **Tracking** — daily goal + streak ring (`src/tracking/`). The goal is stretched
+  minutes, plus an optional rep target per exercise; with a target set, the day only
+  counts once the time **and** every target is hit.
 
 ## Develop & iterate
 
